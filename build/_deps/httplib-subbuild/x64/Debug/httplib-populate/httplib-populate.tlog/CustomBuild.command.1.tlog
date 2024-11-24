@@ -1,0 +1,150 @@
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\HTTPLIB-SUBBUILD\CMAKEFILES\87CB9FC9AD95736FA99E20F9CC2B3FE7\HTTPLIB-POPULATE-MKDIR.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -Dcfgdir=/Debug -P C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/httplib-populate-prefix/tmp/httplib-populate-mkdirs.cmake
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/httplib-populate-prefix/src/httplib-populate-stamp/Debug/httplib-populate-mkdir
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\HTTPLIB-SUBBUILD\CMAKEFILES\87CB9FC9AD95736FA99E20F9CC2B3FE7\HTTPLIB-POPULATE-DOWNLOAD.RULE
+setlocal
+cd C:\Users\BK\Documents\GitHub\WPP\build\_deps
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE -P C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/httplib-populate-prefix/tmp/httplib-populate-gitclone.cmake
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/httplib-populate-prefix/src/httplib-populate-stamp/Debug/httplib-populate-download
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\HTTPLIB-SUBBUILD\CMAKEFILES\87CB9FC9AD95736FA99E20F9CC2B3FE7\HTTPLIB-POPULATE-UPDATE.RULE
+setlocal
+cd C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -Dcan_fetch=YES -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE -P C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/httplib-populate-prefix/tmp/httplib-populate-gitupdate.cmake
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\HTTPLIB-SUBBUILD\CMAKEFILES\87CB9FC9AD95736FA99E20F9CC2B3FE7\HTTPLIB-POPULATE-PATCH.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/httplib-populate-prefix/src/httplib-populate-stamp/Debug/httplib-populate-patch
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\HTTPLIB-SUBBUILD\CMAKEFILES\87CB9FC9AD95736FA99E20F9CC2B3FE7\HTTPLIB-POPULATE-CONFIGURE.RULE
+setlocal
+cd C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-build
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/httplib-populate-prefix/src/httplib-populate-stamp/Debug/httplib-populate-configure
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\HTTPLIB-SUBBUILD\CMAKEFILES\87CB9FC9AD95736FA99E20F9CC2B3FE7\HTTPLIB-POPULATE-BUILD.RULE
+setlocal
+cd C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-build
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/httplib-populate-prefix/src/httplib-populate-stamp/Debug/httplib-populate-build
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\HTTPLIB-SUBBUILD\CMAKEFILES\87CB9FC9AD95736FA99E20F9CC2B3FE7\HTTPLIB-POPULATE-INSTALL.RULE
+setlocal
+cd C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-build
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/httplib-populate-prefix/src/httplib-populate-stamp/Debug/httplib-populate-install
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\HTTPLIB-SUBBUILD\CMAKEFILES\87CB9FC9AD95736FA99E20F9CC2B3FE7\HTTPLIB-POPULATE-TEST.RULE
+setlocal
+cd C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-build
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/httplib-populate-prefix/src/httplib-populate-stamp/Debug/httplib-populate-test
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\HTTPLIB-SUBBUILD\CMAKEFILES\5E05839A869419AE2C7954C92B7E7FB0\HTTPLIB-POPULATE-COMPLETE.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/CMakeFiles/Debug
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/CMakeFiles/Debug/httplib-populate-complete
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/httplib-populate-prefix/src/httplib-populate-stamp/Debug/httplib-populate-done
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\HTTPLIB-SUBBUILD\CMAKEFILES\3C032564FA067E2D111C12F4AED1513E\HTTPLIB-POPULATE.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\HTTPLIB-SUBBUILD\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild -BC:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild --check-stamp-file C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

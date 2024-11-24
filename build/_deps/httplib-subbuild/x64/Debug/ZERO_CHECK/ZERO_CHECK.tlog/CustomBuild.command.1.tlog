@@ -1,0 +1,10 @@
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\HTTPLIB-SUBBUILD\CMAKEFILES\3C032564FA067E2D111C12F4AED1513E\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild -BC:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-subbuild/httplib-populate.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

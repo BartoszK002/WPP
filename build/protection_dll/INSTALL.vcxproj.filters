@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\CMakeFiles\bb39c4447a72bc48a8b2af42ab5d268b\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{36452A8A-BA89-381B-A250-D21E5A5DA431}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

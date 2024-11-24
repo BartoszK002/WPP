@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-subbuild\CMakeFiles\89ec3ebc60a77c9c7f1ed2e83c06a396\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{82C4802B-F5F3-344A-9008-60B912C64FAD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

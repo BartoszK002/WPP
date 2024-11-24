@@ -1,0 +1,10 @@
+^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\JSON-SUBBUILD\CMAKEFILES\89EC3EBC60A77C9C7F1ED2E83C06A396\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/BK/Documents/GitHub/WPP/build/_deps/json-subbuild -BC:/Users/BK/Documents/GitHub/WPP/build/_deps/json-subbuild --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-subbuild/json-populate.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

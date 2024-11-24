@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-subbuild\CMakeFiles\87cb9fc9ad95736fa99e20f9cc2b3fe7\httplib-populate-mkdir.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-subbuild\CMakeFiles\87cb9fc9ad95736fa99e20f9cc2b3fe7\httplib-populate-download.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-subbuild\CMakeFiles\87cb9fc9ad95736fa99e20f9cc2b3fe7\httplib-populate-update.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-subbuild\CMakeFiles\87cb9fc9ad95736fa99e20f9cc2b3fe7\httplib-populate-patch.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-subbuild\CMakeFiles\87cb9fc9ad95736fa99e20f9cc2b3fe7\httplib-populate-configure.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-subbuild\CMakeFiles\87cb9fc9ad95736fa99e20f9cc2b3fe7\httplib-populate-build.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-subbuild\CMakeFiles\87cb9fc9ad95736fa99e20f9cc2b3fe7\httplib-populate-install.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-subbuild\CMakeFiles\87cb9fc9ad95736fa99e20f9cc2b3fe7\httplib-populate-test.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-subbuild\CMakeFiles\5e05839a869419ae2c7954c92b7e7fb0\httplib-populate-complete.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-subbuild\CMakeFiles\3c032564fa067e2d111c12f4aed1513e\httplib-populate.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-subbuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-subbuild\CMakeFiles\httplib-populate" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{776FB79A-E76D-31AA-AF0B-9413A066377A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

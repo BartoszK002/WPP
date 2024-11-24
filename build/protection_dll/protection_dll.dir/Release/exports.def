@@ -1,0 +1,32 @@
+EXPORTS 
+	??_R0?AVbad_alloc@std@@@8 	 DATA
+	??_R0?AVbad_array_new_length@std@@@8 	 DATA
+	??_R0?AVexception@std@@@8 	 DATA
+	??$_Allocate_manually_vector_aligned@U_Default_allocate_traits@std@@@std@@YAPEAX_K@Z
+	??$_Copy_memmove@PEAKPEAK@std@@YAPEAKPEAK00@Z
+	??$_Emplace_reallocate@AEBK@?$vector@KV?$allocator@K@std@@@std@@AEAAPEAKQEAKAEBK@Z
+	??$_Reallocate_grow_by@V<lambda_65e615be2a453ca0576c979606f46740>@@PEBD_K@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEAAAEAV01@_KV<lambda_65e615be2a453ca0576c979606f46740>@@PEBD_K@Z
+	??0bad_alloc@std@@QEAA@AEBV01@@Z
+	??0bad_array_new_length@std@@QEAA@AEBV01@@Z
+	??0bad_array_new_length@std@@QEAA@XZ
+	??0exception@std@@QEAA@AEBV01@@Z
+	??1?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAA@XZ
+	??1?$vector@KV?$allocator@K@std@@@std@@QEAA@XZ
+	??1bad_array_new_length@std@@UEAA@XZ
+	??1exception@std@@UEAA@XZ
+	??_7bad_alloc@std@@6B@
+	??_7bad_array_new_length@std@@6B@
+	??_7exception@std@@6B@
+	?Cleanup@Protection@@YAXXZ
+	?HookMemoryAllocation@Protection@@YA_NXZ
+	?Initialize@Protection@@YA_NXZ
+	?MonitorHandleCreation@Protection@@YA_NXZ
+	?PreventRemoteThreads@Protection@@YA_NXZ
+	?StripHandles@Protection@@YA_NXZ
+	?StripProcessHandles@Protection@@YA_NXZ
+	?_Throw_bad_array_new_length@std@@YAXXZ
+	?_Xlen_string@std@@YAXXZ
+	?_Xlength@?$vector@KV?$allocator@K@std@@@std@@CAXXZ
+	?deallocate@?$allocator@K@std@@QEAAXQEAK_K@Z
+	?what@exception@std@@UEBAPEBDXZ
+	DllMain

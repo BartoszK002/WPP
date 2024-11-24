@@ -1,0 +1,9 @@
+C:/Users/BK/Documents/GitHub/WPP/build/CMakeFiles/INSTALL.dir
+C:/Users/BK/Documents/GitHub/WPP/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/BK/Documents/GitHub/WPP/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/BK/Documents/GitHub/WPP/build/protection_dll/CMakeFiles/protection_dll.dir
+C:/Users/BK/Documents/GitHub/WPP/build/protection_dll/CMakeFiles/INSTALL.dir
+C:/Users/BK/Documents/GitHub/WPP/build/web_ui/CMakeFiles/web_ui.dir
+C:/Users/BK/Documents/GitHub/WPP/build/web_ui/CMakeFiles/INSTALL.dir
+C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-build/CMakeFiles/INSTALL.dir
+C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-build/CMakeFiles/ALL_BUILD.dir

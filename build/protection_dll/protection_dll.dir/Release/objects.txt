@@ -1,0 +1,3 @@
+C:/Users/BK/Documents/GitHub/WPP/build/protection_dll/protection_dll.dir/Release/dllmain.obj
+C:/Users/BK/Documents/GitHub/WPP/build/protection_dll/protection_dll.dir/Release/protection.obj
+C:/Users/BK/Documents/GitHub/WPP/build/protection_dll/protection_dll.dir/Release/handle_monitor.obj
