@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <gdiplus.h>
 #include <unordered_map>
+#include <unordered_set>
 #include <shared_mutex>
 #include <psapi.h>
 #include <tlhelp32.h>
@@ -38,6 +39,7 @@ struct ProcessInfo {
     bool isProtected;
     std::string iconBase64;    // Base64 encoded icon data
     bool is64Bit;              // Whether the process is 64-bit
+    bool hasVisibleWindow;     // Whether the process has a visible window
     
     // Additional process details
     std::string status;        // Running/Suspended
@@ -50,10 +52,12 @@ struct ProcessInfo {
 
 class ProcessManager {
 public:
-    static std::vector<ProcessInfo> GetRunningProcesses();
+    static std::vector<ProcessInfo> GetRunningProcesses(bool includeSystemProcesses = true);
     static bool InjectProtectionDLL(DWORD pid, std::string& errorMsg);
     static bool IsProcessProtected(DWORD pid);
     static ProcessInfo GetProcessDetails(DWORD pid); // New function for detailed info
+    static bool IsWindowsSystemProcess(const std::wstring& processName, DWORD pid);
+    static bool HasVisibleWindow(DWORD pid);
 
 private:
     static std::string GetProcessIconBase64(DWORD pid);

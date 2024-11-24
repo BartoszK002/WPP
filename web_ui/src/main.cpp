@@ -140,56 +140,76 @@ const char* HTML_BODY = R"html(
             </div>
         </div>
 
-        <div class="control-panels">
-            <div class="control-panel">
-                <h3><i class="material-icons">search</i>Process Search</h3>
-                <div class="search-controls">
-                    <div class="search-container">
-                        <input type="text" id="searchInput" placeholder="Search processes..." />
-                        <button type="button" class="search-clear" id="searchClear" aria-label="Clear search">
-                            <i class="material-icons">close</i>
-                        </button>
+        <div class="control-layout">
+            <div class="top-controls">
+                <div class="control-panel filter-panel">
+                    <h3><i class="material-icons">filter_list</i>Process Filters</h3>
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label>Architecture:</label>
+                            <select id="archFilter">
+                                <option value="all">All</option>
+                                <option value="x64">x64</option>
+                                <option value="x86">x86</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Status:</label>
+                            <select id="protectionFilter">
+                                <option value="all">All</option>
+                                <option value="protected">Protected</option>
+                                <option value="unprotected">Unprotected</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Type:</label>
+                            <select id="systemFilter">
+                                <option value="all">All Processes</option>
+                                <option value="user">User Processes</option>
+                                <option value="system">System Processes</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Window:</label>
+                            <select id="windowFilter">
+                                <option value="all">All Processes</option>
+                                <option value="visible">With Window</option>
+                                <option value="hidden">Without Window</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="help-text">Search by process name or PID (updates in real-time)</div>
+                </div>
+
+                <div class="control-panel refresh-panel">
+                    <h3><i class="material-icons">refresh</i>Refresh Settings</h3>
+                    <div class="refresh-controls">
+                        <div class="refresh-group">
+                            <label>
+                                <input type="checkbox" id="autoRefresh" checked>
+                                Auto-refresh
+                            </label>
+                            <select id="refreshInterval">
+                                <option value="1000">1 second</option>
+                                <option value="2000">2 seconds</option>
+                                <option value="5000" selected>5 seconds</option>
+                                <option value="10000">10 seconds</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="control-panel">
-                <h3><i class="material-icons">filter_list</i>Process Filters</h3>
-                <div class="filter-controls">
-                    <div class="filter-group">
-                        <label>Architecture:</label>
-                        <select id="archFilter">
-                            <option value="all">All</option>
-                            <option value="x64">x64</option>
-                            <option value="x86">x86</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Status:</label>
-                        <select id="protectionFilter">
-                            <option value="all">All</option>
-                            <option value="protected">Protected</option>
-                            <option value="unprotected">Unprotected</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="control-panel">
-                <h3><i class="material-icons">refresh</i>Refresh Settings</h3>
-                <div class="refresh-controls">
-                    <div class="refresh-group">
-                        <label>
-                            <input type="checkbox" id="autoRefresh" checked>
-                            Auto-refresh
-                        </label>
-                        <select id="refreshInterval">
-                            <option value="1000">1 second</option>
-                            <option value="2000">2 seconds</option>
-                            <option value="5000" selected>5 seconds</option>
-                            <option value="10000">10 seconds</option>
-                        </select>
+            <div class="search-row">
+                <div class="control-panel search-panel">
+                    <h3><i class="material-icons">search</i>Process Search</h3>
+                    <div class="search-controls">
+                        <div class="search-container">
+                            <input type="text" id="searchInput" placeholder="Search processes..." />
+                            <button type="button" class="search-clear" id="searchClear" aria-label="Clear search">
+                                <i class="material-icons">close</i>
+                            </button>
+                        </div>
+                        <div class="help-text">Search by process name or PID (updates in real-time)</div>
                     </div>
                 </div>
             </div>
@@ -264,6 +284,8 @@ int main() {
             process["icon"] = proc.iconBase64;
             process["is64Bit"] = proc.is64Bit;
             process["isProtected"] = proc.isProtected;
+            process["isSystemProcess"] = pm.IsWindowsSystemProcess(std::wstring(proc.name.begin(), proc.name.end()), proc.pid);
+            process["hasVisibleWindow"] = proc.hasVisibleWindow;
             j.push_back(process);
         }
         

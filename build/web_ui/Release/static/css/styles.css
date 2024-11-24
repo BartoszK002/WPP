@@ -230,11 +230,21 @@ button:active {
     font-weight: 500;
 }
 
-.control-panels {
-    display: grid;
-    grid-template-columns: 1.5fr 0.75fr 0.75fr;  
-    gap: 20px;
+.control-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     margin-bottom: 20px;
+}
+
+.top-controls {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 16px;
+}
+
+.search-row {
+    width: 100%;
 }
 
 .control-panel {
@@ -242,6 +252,7 @@ button:active {
     border-radius: 8px;
     padding: 16px;
     border: 1px solid var(--border-color);
+    min-width: 0;
 }
 
 .control-panel h3 {
@@ -258,44 +269,117 @@ button:active {
     opacity: 0.8;
 }
 
+.filter-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-controls {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-group label {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.filter-group select {
+    width: 100%;
+    padding: 6px 8px;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.refresh-panel {
+    display: flex;
+    flex-direction: column;
+}
+
 .refresh-controls {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 12px;
+    flex-grow: 1;
+}
+
+.refresh-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.refresh-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.refresh-group select {
+    width: 100%;
+    padding: 6px 8px;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.search-panel {
+    width: 100%;
+    max-width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
 }
 
 .search-controls {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    width: 100%;  
+    max-width: 100%;
 }
 
 .search-container {
     position: relative;
-    width: 100%;  
-    min-width: 0;  
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
 }
 
 #searchInput {
     width: 100%;
+    max-width: 100%;
     padding: 8px 32px 8px 12px;
     font-size: 14px;
     background-color: var(--secondary-bg);
+    box-sizing: border-box;
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     border-radius: 4px;
     outline: none;
     transition: border-color 0.2s;
-    box-sizing: border-box;  
 }
 
-#searchInput:focus {
-    outline: none;
-    border-color: var(--accent-color);
-}
-
-.search-clear {
+button[type="button"].search-clear-button {
     position: absolute;
     right: 8px;
     top: 50%;
@@ -304,60 +388,18 @@ button:active {
     border: none;
     color: var(--text-secondary);
     cursor: pointer;
-    padding: 4px 8px;
-}
-
-.search-clear:hover {
-    color: var(--text-primary);
-}
-
-select {
-    background-color: var(--secondary-bg);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 8px;
-    border-radius: 4px;
-    min-width: 120px;
-}
-
-select:focus {
-    outline: none;
-    border-color: var(--accent-color);
-}
-
-.filter-controls {
+    padding: 4px;
     display: flex;
-    flex-direction: column;
-    gap: 16px;  
-    padding: 4px;  
-}
-
-.filter-group {
-    display: flex;
-    gap: 12px;  
     align-items: center;
+    justify-content: center;
+    z-index: 1;
 }
 
-.filter-group label {
-    min-width: 85px;  
-    color: var(--text-secondary);
-    font-size: 14px;
-}
-
-.filter-group select {
-    flex: 1;
-    min-width: 120px;  
-    padding: 6px 8px;
-    background-color: var(--secondary-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+button[type="button"].search-clear-button:hover {
     color: var(--text-primary);
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s;
 }
 
-.filter-group select:focus {
+#searchInput:focus {
     border-color: var(--accent-color);
 }
 
@@ -472,20 +514,22 @@ select:focus {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.3);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    pointer-events: none;
 }
 
 .loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid transparent;
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
     border-radius: 50%;
     border-top-color: var(--accent-color);
-    animation: spin 1s linear infinite;
+    animation: spin 0.8s linear infinite;
+    pointer-events: none;
 }
 
 @keyframes spin {

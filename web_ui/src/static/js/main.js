@@ -6,6 +6,8 @@ let currentSortColumn = 'name';
 let sortDirection = 1;
 let archFilter = 'all';
 let protectionFilter = 'all';
+let systemFilter = 'all';
+let windowFilter = 'all';
 
 // Compile regex once and cache it
 let searchRegex = null;
@@ -26,13 +28,20 @@ const UPDATE_THRESHOLD = 500; // ms
 
 function updateProcessList() {
     const now = Date.now();
-    // Only show loading on initial load
-    if (isInitialLoad) {
+    const loadingOverlay = document.querySelector('.loading-overlay');
+    
+    // Only show loading on initial load and if not already showing
+    if (isInitialLoad && !loadingOverlay) {
         showLoading();
     }
     
     fetch('/api/processes')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             const processesByPid = new Map(data.map(p => [p.pid, p]));
             const changes = new Set();
@@ -73,10 +82,9 @@ function updateProcessList() {
         })
         .catch(error => {
             console.error('Error fetching processes:', error);
-            if (isInitialLoad) {
-                hideLoading();
-                isInitialLoad = false;
-            }
+            hideLoading();
+            isInitialLoad = false;
+            showNotification('Failed to fetch process list', 'error');
         });
 }
 
@@ -98,16 +106,33 @@ function applySearchAndSort() {
         });
     }
 
+    // Apply architecture filter
     if (archFilter !== 'all') {
+        filteredProcesses = filteredProcesses.filter(process => 
+            archFilter === 'x64' ? process.is64Bit : !process.is64Bit
+        );
+    }
+
+    // Apply protection filter
+    if (protectionFilter !== 'all') {
+        filteredProcesses = filteredProcesses.filter(process => 
+            protectionFilter === 'protected' ? process.isProtected : !process.isProtected
+        );
+    }
+
+    // Apply system process filter
+    if (systemFilter !== 'all') {
         filteredProcesses = filteredProcesses.filter(process => {
-            return (archFilter === 'x64') === process.is64Bit;
+            const isSystemProcess = process.isSystemProcess;
+            return systemFilter === 'system' ? isSystemProcess : !isSystemProcess;
         });
     }
 
-    if (protectionFilter !== 'all') {
-        filteredProcesses = filteredProcesses.filter(process => {
-            return (protectionFilter === 'protected') === process.isProtected;
-        });
+    // Apply window filter
+    if (windowFilter !== 'all') {
+        filteredProcesses = filteredProcesses.filter(process => 
+            windowFilter === 'visible' ? process.hasVisibleWindow : !process.hasVisibleWindow
+        );
     }
 
     // Apply sorting
@@ -294,10 +319,12 @@ function startAutoRefresh() {
 
 // Add loading overlay
 function showLoading() {
-    const overlay = document.createElement('div');
-    overlay.className = 'loading-overlay';
-    overlay.innerHTML = '<div class="loading-spinner"></div>';
-    document.body.appendChild(overlay);
+    if (!document.querySelector('.loading-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = '<div class="loading-spinner"></div>';
+        document.body.appendChild(overlay);
+    }
 }
 
 function hideLoading() {
@@ -642,6 +669,16 @@ document.addEventListener('DOMContentLoaded', function() {
         applySearchAndSort();
     });
 
+    document.getElementById('systemFilter').addEventListener('change', (e) => {
+        systemFilter = e.target.value;
+        applySearchAndSort();
+    });
+
+    document.getElementById('windowFilter').addEventListener('change', (e) => {
+        windowFilter = e.target.value;
+        applySearchAndSort();
+    });
+
     // Setup sorting
     document.querySelectorAll('th[data-column]').forEach(th => {
         th.addEventListener('click', () => {
@@ -680,7 +717,12 @@ document.addEventListener('DOMContentLoaded', function() {
     autoRefreshCheckbox.addEventListener('change', updateAutoRefresh);
     refreshIntervalSelect.addEventListener('change', updateAutoRefresh);
 
-    // Initial load
+    // Initial load and start auto-refresh
     updateProcessList();
-    updateAutoRefresh();
+    if (autoRefreshCheckbox.checked) {
+        const interval = parseInt(refreshIntervalSelect.value);
+        if (interval > 0) {
+            refreshIntervalId = setInterval(updateProcessList, interval);
+        }
+    }
 });

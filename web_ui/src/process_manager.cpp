@@ -615,7 +615,50 @@ std::string ProcessManager::GetProcessCommandLine(HANDLE hProcess) {
     return ConvertToString(cmdLine);
 }
 
-std::vector<ProcessInfo> ProcessManager::GetRunningProcesses() {
+bool ProcessManager::IsWindowsSystemProcess(const std::wstring& processName, DWORD pid) {
+    // List of known Windows system process names
+    static const std::unordered_set<std::wstring> systemProcesses = {
+        L"System",
+        L"Registry",
+        L"smss.exe",
+        L"csrss.exe",
+        L"wininit.exe",
+        L"services.exe",
+        L"lsass.exe",
+        L"winlogon.exe",
+        L"fontdrvhost.exe",
+        L"dwm.exe",
+        L"svchost.exe",
+        L"Memory Compression",
+        L"System Idle Process",
+        L"spoolsv.exe",
+        L"SearchIndexer.exe",
+        L"WmiPrvSE.exe",
+        L"dllhost.exe",
+        L"sihost.exe",
+        L"taskhostw.exe",
+        L"explorer.exe",
+        L"RuntimeBroker.exe",
+        L"SearchHost.exe",
+        L"StartMenuExperienceHost.exe",
+        L"TextInputHost.exe",
+        L"ctfmon.exe",
+        L"conhost.exe",
+        L"SecurityHealthService.exe",
+        L"SecurityHealthSystray.exe",
+        L"SgrmBroker.exe",
+        L"audiodg.exe"
+    };
+
+    // Special handling for system processes with PID 0 or 4
+    if (pid == 0 || pid == 4) {
+        return true;
+    }
+
+    return systemProcesses.find(processName) != systemProcesses.end();
+}
+
+std::vector<ProcessInfo> ProcessManager::GetRunningProcesses(bool includeSystemProcesses) {
     std::vector<ProcessInfo> processes;
     HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     
@@ -636,8 +679,13 @@ std::vector<ProcessInfo> ProcessManager::GetRunningProcesses() {
                     info.name = utf8Name;
                 }
                 
+                if (!includeSystemProcesses && IsWindowsSystemProcess(processEntry.szExeFile, info.pid)) {
+                    continue;
+                }
+                
                 info.isProtected = IsProcessProtected(info.pid);
                 info.iconBase64 = GetProcessIconBase64(info.pid);
+                info.hasVisibleWindow = HasVisibleWindow(info.pid);
                 
                 // Get process architecture
                 HANDLE processHandle = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, info.pid);
@@ -758,43 +806,68 @@ bool ProcessManager::InjectProtectionDLL(DWORD pid, std::string& errorMsg) {
         return false;
     }
 
-    // Allocate memory for DLL path
+    // Get LoadLibraryW address
+    LPVOID loadLibraryAddr = (LPVOID)GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "LoadLibraryW");
+    if (loadLibraryAddr == NULL) {
+        DWORD error = GetLastError();
+        LPVOID lpMsgBuf;
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            error,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR) &lpMsgBuf,
+            0, NULL);
+        
+        errorMsg = "Failed to get LoadLibraryW address: " + std::string((char*)lpMsgBuf);
+        std::cout << "Error: " << errorMsg << std::endl;
+        LocalFree(lpMsgBuf);
+        CloseHandle(hProcess);
+        return false;
+    }
+
+    // First allocate memory for the DLL path
     size_t dllPathSize = (dllPath.length() + 1) * sizeof(wchar_t);
     LPVOID dllPathAddr = VirtualAllocEx(hProcess, NULL, dllPathSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (dllPathAddr == NULL) {
         DWORD error = GetLastError();
-        errorMsg = "Failed to allocate memory in process '" + processName + "'. Error code: " + std::to_string(error);
+        LPVOID lpMsgBuf;
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            error,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR) &lpMsgBuf,
+            0, NULL);
+        
+        errorMsg = "Failed to allocate memory in process '" + processName + "': " + (char*)lpMsgBuf;
         std::cout << "Error: " << errorMsg << std::endl;
+        LocalFree(lpMsgBuf);
         CloseHandle(hProcess);
         return false;
     }
 
-    // Write DLL path to process memory
+    // Write the DLL path to the allocated memory
     if (!WriteProcessMemory(hProcess, dllPathAddr, dllPath.c_str(), dllPathSize, NULL)) {
         DWORD error = GetLastError();
-        errorMsg = "Failed to write to process '" + processName + "' memory. Error code: " + std::to_string(error);
+        LPVOID lpMsgBuf;
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            error,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR) &lpMsgBuf,
+            0, NULL);
+        
+        errorMsg = "Failed to write to process memory '" + processName + "': " + (char*)lpMsgBuf;
         std::cout << "Error: " << errorMsg << std::endl;
-        VirtualFreeEx(hProcess, dllPathAddr, 0, MEM_RELEASE);
-        CloseHandle(hProcess);
-        return false;
-    }
-
-    // Get LoadLibraryW address
-    HMODULE hKernel32 = GetModuleHandleW(L"kernel32.dll");
-    if (hKernel32 == NULL) {
-        DWORD error = GetLastError();
-        errorMsg = "Failed to get kernel32.dll handle. Error code: " + std::to_string(error);
-        std::cout << "Error: " << errorMsg << std::endl;
-        VirtualFreeEx(hProcess, dllPathAddr, 0, MEM_RELEASE);
-        CloseHandle(hProcess);
-        return false;
-    }
-
-    LPTHREAD_START_ROUTINE loadLibraryAddr = (LPTHREAD_START_ROUTINE)GetProcAddress(hKernel32, "LoadLibraryW");
-    if (loadLibraryAddr == NULL) {
-        DWORD error = GetLastError();
-        errorMsg = "Failed to get LoadLibraryW address. Error code: " + std::to_string(error);
-        std::cout << "Error: " << errorMsg << std::endl;
+        LocalFree(lpMsgBuf);
         VirtualFreeEx(hProcess, dllPathAddr, 0, MEM_RELEASE);
         CloseHandle(hProcess);
         return false;
@@ -803,7 +876,7 @@ bool ProcessManager::InjectProtectionDLL(DWORD pid, std::string& errorMsg) {
     std::cout << "Creating remote thread to load DLL..." << std::endl;
     
     // Create remote thread to load DLL
-    HANDLE hThread = CreateRemoteThread(hProcess, NULL, 0, loadLibraryAddr, dllPathAddr, 0, NULL);
+    HANDLE hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)loadLibraryAddr, dllPathAddr, 0, NULL);
     if (hThread == NULL) {
         DWORD error = GetLastError();
         LPVOID lpMsgBuf;
@@ -827,24 +900,9 @@ bool ProcessManager::InjectProtectionDLL(DWORD pid, std::string& errorMsg) {
 
     std::cout << "Waiting for thread completion..." << std::endl;
     
-    // Wait for thread completion
-    WaitForSingleObject(hThread, INFINITE);
-
-    // Get thread exit code
-    DWORD exitCode;
-    if (!GetExitCodeThread(hThread, &exitCode)) {
-        DWORD error = GetLastError();
-        errorMsg = "Failed to get thread exit code from process '" + processName + "'. Error code: " + std::to_string(error);
-        std::cout << "Error: " << errorMsg << std::endl;
-        CloseHandle(hThread);
-        VirtualFreeEx(hProcess, dllPathAddr, 0, MEM_RELEASE);
-        CloseHandle(hProcess);
-        return false;
-    }
-
-    std::cout << "Thread exit code: " << exitCode << std::endl;
-
-    if (exitCode == 0) {
+    // Wait for thread completion with timeout
+    DWORD waitResult = WaitForSingleObject(hThread, 5000); // 5 second timeout
+    if (waitResult != WAIT_OBJECT_0) {
         DWORD error = GetLastError();
         LPVOID lpMsgBuf;
         FormatMessage(
@@ -857,9 +915,117 @@ bool ProcessManager::InjectProtectionDLL(DWORD pid, std::string& errorMsg) {
             (LPTSTR) &lpMsgBuf,
             0, NULL);
         
-        errorMsg = "Failed to inject DLL into process '" + processName + "': " + (char*)lpMsgBuf;
+        errorMsg = "DLL injection timed out for process '" + processName + "': " + (char*)lpMsgBuf;
         std::cout << "Error: " << errorMsg << std::endl;
         LocalFree(lpMsgBuf);
+        CloseHandle(hThread);
+        VirtualFreeEx(hProcess, dllPathAddr, 0, MEM_RELEASE);
+        CloseHandle(hProcess);
+        return false;
+    }
+
+    // Get thread exit code - this will be the return value from LoadLibrary
+    DWORD exitCode;
+    if (!GetExitCodeThread(hThread, &exitCode)) {
+        DWORD error = GetLastError();
+        LPVOID lpMsgBuf;
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            error,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR) &lpMsgBuf,
+            0, NULL);
+            
+        errorMsg = "Failed to get thread exit code from process '" + processName + "': " + (char*)lpMsgBuf;
+        std::cout << "Error: " << errorMsg << std::endl;
+        LocalFree(lpMsgBuf);
+        CloseHandle(hThread);
+        VirtualFreeEx(hProcess, dllPathAddr, 0, MEM_RELEASE);
+        CloseHandle(hProcess);
+        return false;
+    }
+
+    std::cout << "Thread exit code (LoadLibrary result): 0x" << std::hex << exitCode << std::dec << std::endl;
+
+    if (exitCode == 0) {
+        // Try to determine why LoadLibrary failed
+        DWORD error = 0;
+        BOOL isTarget32Bit = FALSE;
+        BOOL isTarget64Bit = FALSE;
+        
+        // Check if we can access the DLL file
+        HANDLE hFile = CreateFileW(dllPath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+        if (hFile == INVALID_HANDLE_VALUE) {
+            error = GetLastError();
+        } else {
+            CloseHandle(hFile);
+            
+            // Check architecture mismatch
+            BOOL isSystem64Bit = FALSE;
+            SYSTEM_INFO sysInfo;
+            GetNativeSystemInfo(&sysInfo);
+            isSystem64Bit = (sysInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64);
+
+#ifdef _WIN64
+            // If we're 64-bit, check if target is 32-bit
+            IsWow64Process(hProcess, &isTarget32Bit);
+            if (isTarget32Bit) {
+                error = ERROR_BAD_EXE_FORMAT;
+            }
+#else
+            // If we're 32-bit, check if target is 64-bit
+            IsWow64Process(hProcess, &isTarget64Bit);
+            if (!isTarget64Bit && isSystem64Bit) {
+                error = ERROR_BAD_EXE_FORMAT;
+            }
+#endif
+            if (error == 0) {
+                // If architecture is fine, it might be missing dependencies
+                error = ERROR_BAD_EXE_FORMAT;
+            }
+        }
+        
+        std::string additionalInfo;
+        if (error == ERROR_BAD_EXE_FORMAT) {
+#ifdef _WIN64
+            additionalInfo = " (Architecture mismatch: trying to inject 64-bit DLL into ";
+            additionalInfo += isTarget32Bit ? "32-bit" : "64-bit";
+            additionalInfo += " process)";
+#else
+            additionalInfo = " (Architecture mismatch: trying to inject 32-bit DLL into ";
+            additionalInfo += isTarget64Bit ? "64-bit" : "32-bit";
+            additionalInfo += " process)";
+#endif
+        }
+
+        LPVOID lpMsgBuf;
+        if (FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            error,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR) &lpMsgBuf,
+            0, NULL) == 0) {
+            // If FormatMessage fails, provide a more specific error
+            errorMsg = "Failed to inject DLL into process '" + processName + "': Unable to load DLL (Error code: " + 
+                      std::to_string(error) + ")" + additionalInfo;
+        } else {
+            std::string errorText = (char*)lpMsgBuf;
+            // Remove any %1 placeholders from the error message
+            size_t pos;
+            while ((pos = errorText.find("%1")) != std::string::npos) {
+                errorText.replace(pos, 2, "DLL");
+            }
+            errorMsg = "Failed to inject DLL into process '" + processName + "': " + errorText + additionalInfo;
+            LocalFree(lpMsgBuf);
+        }
+        
+        std::cout << "Error: " << errorMsg << std::endl;
         
         CloseHandle(hThread);
         VirtualFreeEx(hProcess, dllPathAddr, 0, MEM_RELEASE);
@@ -956,23 +1122,27 @@ SIZE_T ProcessManager::GetProcessPrivateWorkingSet(HANDLE hProcess) {
 }
 
 bool ProcessManager::IsProcess64Bit(HANDLE process) {
-    BOOL isWow64 = FALSE;
-    
-    // First check if we're on 64-bit Windows
-    #ifdef _WIN64
-        // Check if the process is running under WOW64
-        if (!IsWow64Process(process, &isWow64)) {
-            // If we can't determine, check if it's a system process
-            DWORD pid = GetProcessId(process);
-            if (pid == 0 || pid == 4) {  // System Idle Process (0) and System Process (4)
-                return true;  // These are native 64-bit on 64-bit Windows
-            }
-            return true;  // Default to 64-bit if we can't determine on 64-bit Windows
-        }
-        return !isWow64;  // If isWow64 is TRUE, it's 32-bit, otherwise 64-bit
-    #else
+    BOOL isWow64;
+    SYSTEM_INFO systemInfo;
+    GetNativeSystemInfo(&systemInfo);
+    bool isSystem64Bit = (systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64);
+
+    // First check if we're on a 64-bit system
+    if (!isSystem64Bit) {
         return false;  // On 32-bit Windows, all processes are 32-bit
-    #endif
+    }
+
+    // Check if the process is running under WOW64
+    if (!IsWow64Process(process, &isWow64)) {
+        // If we can't determine, check if it's a system process
+        DWORD pid = GetProcessId(process);
+        if (pid == 0 || pid == 4) {  // System Idle Process (0) and System Process (4)
+            return true;  // These are native 64-bit on 64-bit Windows
+        }
+        return true;  // Default to 64-bit if we can't determine on 64-bit Windows
+    }
+
+    return !isWow64;  // If isWow64 is TRUE, it's 32-bit, otherwise 64-bit
 }
 
 std::string ProcessManager::GetProcessUsername(HANDLE hProcess) {
@@ -1145,8 +1315,8 @@ ProcessInfo ProcessManager::GetProcessDetails(DWORD pid) {
                             }
                         }
                     }
-                }
 #endif
+                }
             }
         }
     }
@@ -1186,7 +1356,32 @@ ProcessInfo ProcessManager::GetProcessDetails(DWORD pid) {
     info.status = GetProcessStatus(hProcess);
     info.isProtected = IsProcessProtected(pid);
     info.iconBase64 = GetProcessIconBase64(pid);
+    info.hasVisibleWindow = HasVisibleWindow(pid);
 
     CloseHandle(hProcess);
     return info;
+}
+
+BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam) {
+    DWORD* processId = (DWORD*)lParam;
+    DWORD windowProcessId = 0;
+    GetWindowThreadProcessId(hwnd, &windowProcessId);
+    
+    if (*processId == windowProcessId) {
+        // Check if the window is visible and not a tool window
+        if (IsWindowVisible(hwnd) && 
+            !(GetWindowLongW(hwnd, GWL_EXSTYLE) & WS_EX_TOOLWINDOW) &&
+            GetWindow(hwnd, GW_OWNER) == NULL) {
+            // Found a visible main window
+            *processId = 0;  // Use as a flag to indicate we found a window
+            return FALSE;    // Stop enumeration
+        }
+    }
+    return TRUE;  // Continue enumeration
+}
+
+bool ProcessManager::HasVisibleWindow(DWORD pid) {
+    DWORD processId = pid;
+    EnumWindows(EnumWindowsCallback, (LPARAM)&processId);
+    return processId == 0;  // If processId is 0, we found a window
 }
