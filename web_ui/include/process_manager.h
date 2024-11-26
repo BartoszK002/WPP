@@ -22,7 +22,7 @@ typedef NTSTATUS(NTAPI* NtQueryInformationProcessFn)(
     PULONG ReturnLength
 );
 
-typedef NTSTATUS(NTAPI* NtWow64QueryInformationProcess64Fn)(
+typedef NTSTATUS(NTAPI* NtWow64QueryInformationProcess32Fn)(
     HANDLE ProcessHandle,
     PROCESSINFOCLASS ProcessInformationClass,
     PVOID ProcessInformation,
@@ -58,6 +58,7 @@ public:
     static ProcessInfo GetProcessDetails(DWORD pid); // New function for detailed info
     static bool IsWindowsSystemProcess(const std::wstring& processName, DWORD pid);
     static bool HasVisibleWindow(DWORD pid);
+    static bool EnableDebugPrivilege(); // Function to enable SeDebugPrivilege
 
 private:
     static std::string GetProcessIconBase64(DWORD pid);

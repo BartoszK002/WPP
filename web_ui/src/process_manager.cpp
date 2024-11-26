@@ -46,7 +46,7 @@ typedef struct _PEB32 {
     ULONG ProcessParameters;
 } PEB32;
 
-typedef NTSTATUS(NTAPI* NtWow64QueryInformationProcess64Fn)(
+typedef NTSTATUS(NTAPI* NtWow64QueryInformationProcess32Fn)(
     HANDLE ProcessHandle,
     PROCESSINFOCLASS ProcessInformationClass,
     PVOID ProcessInformation,
@@ -135,7 +135,7 @@ std::shared_mutex ProcessManager::cacheMutex;
 std::string ProcessManager::GetProcessIconBase64(DWORD pid) {
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
     if (!hProcess) {
-        std::cout << "Failed to open process " << pid << " - using placeholder" << std::endl;
+        // std::cout << "Failed to open process " << pid << " - using placeholder" << std::endl;
         // Process access denied or not found - use placeholder
         std::vector<uint8_t> placeholderData = CreatePlaceholderIcon();
         if (!placeholderData.empty()) {
@@ -149,7 +149,7 @@ std::string ProcessManager::GetProcessIconBase64(DWORD pid) {
     DWORD pathSize = MAX_PATH;
     if (!QueryFullProcessImageNameW(hProcess, 0, exePath, &pathSize)) {
         CloseHandle(hProcess);
-        std::cout << "Failed to get exe path for process " << pid << " - using placeholder" << std::endl;
+        // std::cout << "Failed to get exe path for process " << pid << " - using placeholder" << std::endl;
         // Failed to get exe path - use placeholder
         std::vector<uint8_t> placeholderData = CreatePlaceholderIcon();
         if (!placeholderData.empty()) {
@@ -166,7 +166,7 @@ std::string ProcessManager::GetProcessIconBase64(DWORD pid) {
         std::shared_lock<std::shared_mutex> lock(cacheMutex);
         auto it = iconCache.find(exePathStr);
         if (it != iconCache.end()) {
-            std::cout << "Icon found in cache for: " << std::filesystem::path(exePath).string() << std::endl;
+            // std::cout << "Icon found in cache for: " << std::filesystem::path(exePath).string() << std::endl;
             return it->second;
         }
     }
@@ -174,7 +174,7 @@ std::string ProcessManager::GetProcessIconBase64(DWORD pid) {
     // Extract icon data
     std::vector<uint8_t> iconData = ExtractIconFromExe(exePath);
     if (iconData.empty()) {
-        std::cout << "Failed to extract icon for process " << pid << " - using placeholder" << std::endl;
+        // std::cout << "Failed to extract icon for process " << pid << " - using placeholder" << std::endl;
         // Failed to extract icon - use placeholder
         std::vector<uint8_t> placeholderData = CreatePlaceholderIcon();
         if (!placeholderData.empty()) {
@@ -194,7 +194,7 @@ std::string ProcessManager::GetProcessIconBase64(DWORD pid) {
 
     std::string base64Data = Base64Encode(iconData);
     if (base64Data.empty()) {
-        std::cout << "Base64 encoding failed for process " << pid << " - using placeholder" << std::endl;
+        // std::cout << "Base64 encoding failed for process " << pid << " - using placeholder" << std::endl;
         // Failed to encode - use placeholder
         std::vector<uint8_t> placeholderData = CreatePlaceholderIcon();
         if (!placeholderData.empty()) {
@@ -278,13 +278,13 @@ Gdiplus::Bitmap* ProcessManager::IconToBitmapPARGB32(HICON hIcon) {
 std::vector<uint8_t> ProcessManager::ExtractIconFromExe(const std::wstring& exePath) {
     std::vector<uint8_t> result;
 
-    std::cout << "\nExtracting icon from: " << std::filesystem::path(exePath).string() << std::endl;
+    // std::cout << "\nExtracting icon from: " << std::filesystem::path(exePath).string() << std::endl;
 
     // Initialize GDI+
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR gdiplusToken;
     if (Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL) != Gdiplus::Ok) {
-        std::cout << "GdiplusStartup failed" << std::endl;
+        // std::cout << "GdiplusStartup failed" << std::endl;
         return result;
     }
 
@@ -297,12 +297,12 @@ std::vector<uint8_t> ProcessManager::ExtractIconFromExe(const std::wstring& exeP
         sizeof(sfi),
         SHGFI_SYSICONINDEX | SHGFI_USEFILEATTRIBUTES
     )) {
-        std::cout << "SHGetFileInfoW failed" << std::endl;
+        // std::cout << "SHGetFileInfoW failed" << std::endl;
         Gdiplus::GdiplusShutdown(gdiplusToken);
         return result;
     }
 
-    std::cout << "SHGetFileInfoW icon index: " << sfi.iIcon << std::endl;
+    // std::cout << "SHGetFileInfoW icon index: " << sfi.iIcon << std::endl;
 
     // Initialize common controls
     INITCOMMONCONTROLSEX icex;
@@ -318,7 +318,7 @@ std::vector<uint8_t> ProcessManager::ExtractIconFromExe(const std::wstring& exeP
     if (FAILED(hr)) {
         hr = SHGetImageList(SHIL_LARGE, IID_IImageList, (void**)&pImageList);
         if (FAILED(hr)) {
-            std::cout << "SHGetImageList failed, hr = " << hr << std::endl;
+            // std::cout << "SHGetImageList failed, hr = " << hr << std::endl;
             Gdiplus::GdiplusShutdown(gdiplusToken);
             return result;
         }
@@ -328,7 +328,7 @@ std::vector<uint8_t> ProcessManager::ExtractIconFromExe(const std::wstring& exeP
     HICON hIcon = NULL;
     hr = pImageList->GetIcon(sfi.iIcon, ILD_TRANSPARENT, &hIcon);
     if (FAILED(hr) || hIcon == NULL) {
-        std::cout << "GetIcon failed, hr = " << hr << std::endl;
+        // std::cout << "GetIcon failed, hr = " << hr << std::endl;
         pImageList->Release();
         Gdiplus::GdiplusShutdown(gdiplusToken);
         return result;
@@ -337,7 +337,7 @@ std::vector<uint8_t> ProcessManager::ExtractIconFromExe(const std::wstring& exeP
     // Convert HICON to GDI+ Bitmap with proper alpha handling
     Gdiplus::Bitmap* bitmap = IconToBitmapPARGB32(hIcon);
     if (!bitmap) {
-        std::cout << "Failed to convert HICON to Bitmap" << std::endl;
+        // std::cout << "Failed to convert HICON to Bitmap" << std::endl;
         DestroyIcon(hIcon);
         pImageList->Release();
         Gdiplus::GdiplusShutdown(gdiplusToken);
@@ -347,7 +347,7 @@ std::vector<uint8_t> ProcessManager::ExtractIconFromExe(const std::wstring& exeP
     // Create a stream to save the PNG
     IStream* istream = nullptr;
     if (CreateStreamOnHGlobal(NULL, TRUE, &istream) != S_OK) {
-        std::cout << "Failed to create stream" << std::endl;
+        // std::cout << "Failed to create stream" << std::endl;
         delete bitmap;
         DestroyIcon(hIcon);
         pImageList->Release();
@@ -358,7 +358,7 @@ std::vector<uint8_t> ProcessManager::ExtractIconFromExe(const std::wstring& exeP
     // Get encoder CLSID
     CLSID pngClsid;
     if (GetEncoderClsid(L"image/png", &pngClsid) == -1) {
-        std::cout << "Failed to get PNG encoder CLSID" << std::endl;
+        // std::cout << "Failed to get PNG encoder CLSID" << std::endl;
         istream->Release();
         delete bitmap;
         DestroyIcon(hIcon);
@@ -379,7 +379,7 @@ std::vector<uint8_t> ProcessManager::ExtractIconFromExe(const std::wstring& exeP
     // Save to PNG with high quality settings
     Gdiplus::Status status = bitmap->Save(istream, &pngClsid, &encoderParams);
     if (status != Gdiplus::Ok) {
-        std::cout << "Failed to save bitmap to stream. Status: " << status << std::endl;
+        // std::cout << "Failed to save bitmap to stream. Status: " << status << std::endl;
         istream->Release();
         delete bitmap;
         DestroyIcon(hIcon);
@@ -391,7 +391,7 @@ std::vector<uint8_t> ProcessManager::ExtractIconFromExe(const std::wstring& exeP
     // Get stream size
     STATSTG statstg;
     if (istream->Stat(&statstg, STATFLAG_NONAME) != S_OK) {
-        std::cout << "Failed to get stream size" << std::endl;
+        // std::cout << "Failed to get stream size" << std::endl;
         result.clear();
         istream->Release();
         delete bitmap;
@@ -405,7 +405,7 @@ std::vector<uint8_t> ProcessManager::ExtractIconFromExe(const std::wstring& exeP
     result.resize(statstg.cbSize.LowPart);
     LARGE_INTEGER liZero = {};
     if (istream->Seek(liZero, STREAM_SEEK_SET, NULL) != S_OK) {
-        std::cout << "Failed to seek stream" << std::endl;
+        // std::cout << "Failed to seek stream" << std::endl;
         result.clear();
         istream->Release();
         delete bitmap;
@@ -418,7 +418,7 @@ std::vector<uint8_t> ProcessManager::ExtractIconFromExe(const std::wstring& exeP
     ULONG bytesRead = 0;
     if (istream->Read(result.data(), statstg.cbSize.LowPart, &bytesRead) != S_OK ||
         bytesRead != statstg.cbSize.LowPart) {
-        std::cout << "Failed to read stream data" << std::endl;
+        // std::cout << "Failed to read stream data" << std::endl;
         result.clear();
         istream->Release();
         delete bitmap;
@@ -437,7 +437,7 @@ std::vector<uint8_t> ProcessManager::ExtractIconFromExe(const std::wstring& exeP
 
     // Log success and size info
     if (!result.empty()) {
-        std::cout << "Successfully extracted icon, size: " << result.size() << " bytes" << std::endl;
+        // std::cout << "Successfully extracted icon, size: " << result.size() << " bytes" << std::endl;
     }
 
     return result;
@@ -504,10 +504,10 @@ std::vector<uint8_t> ProcessManager::CreatePlaceholderIcon() {
             }
         }
 
-        std::cout << "Successfully loaded placeholder icon, size: " << decodedData.size() << " bytes" << std::endl;
+        // std::cout << "Successfully loaded placeholder icon, size: " << decodedData.size() << " bytes" << std::endl;
     }
     catch (const std::exception& e) {
-        std::cout << "Error loading placeholder icon: " << e.what() << std::endl;
+        // std::cout << "Error loading placeholder icon: " << e.what() << std::endl;
         decodedData.clear();
     }
 
@@ -515,71 +515,105 @@ std::vector<uint8_t> ProcessManager::CreatePlaceholderIcon() {
 }
 
 std::string ProcessManager::GetProcessCommandLine(HANDLE hProcess) {
-    if (!hProcess) return "N/A";
+    if (!hProcess) {
+        std::cout << "[GetProcessCommandLine] Invalid process handle" << std::endl;
+        return "N/A";
+    }
 
     bool is64Bit = IsProcess64Bit(hProcess);
+    std::cout << "[GetProcessCommandLine] Process architecture: " << (is64Bit ? "64-bit" : "32-bit") << std::endl;
     
 #ifdef _WIN64
     if (!is64Bit) {
-        // Handle 32-bit process from 64-bit code
-        PROCESS_BASIC_INFORMATION32 pbi32;
-        ULONG returnLength;
+        std::cout << "[GetProcessCommandLine] Handling 32-bit process from 64-bit code" << std::endl;
         
+        // Get NtQueryInformationProcess
         HMODULE hNtDll = GetModuleHandleW(L"ntdll.dll");
-        if (!hNtDll) return "N/A";
-        
-        auto NtWow64QueryInformationProcess64 = reinterpret_cast<NtWow64QueryInformationProcess64Fn>(
-            GetProcAddress(hNtDll, "NtWow64QueryInformationProcess64")
+        if (!hNtDll) {
+            std::cout << "[GetProcessCommandLine] GetModuleHandleW failed, error: " << GetLastError() << std::endl;
+            return "N/A";
+        }
+
+        auto NtQueryInformationProcess = reinterpret_cast<NtQueryInformationProcessFn>(
+            GetProcAddress(hNtDll, "NtQueryInformationProcess")
         );
         
-        if (!NtWow64QueryInformationProcess64) return "N/A";
+        if (!NtQueryInformationProcess) {
+            std::cout << "[GetProcessCommandLine] GetProcAddress failed, error: " << GetLastError() << std::endl;
+            return "N/A";
+        }
         
-        NTSTATUS status = NtWow64QueryInformationProcess64(
+        // Get the address of the 32-bit PEB
+        PVOID peb32Address = NULL;
+        NTSTATUS status = NtQueryInformationProcess(
             hProcess,
-            ProcessBasicInformation,
-            &pbi32,
-            sizeof(pbi32),
-            &returnLength
+            ProcessWow64Information,
+            &peb32Address,
+            sizeof(peb32Address),
+            NULL
         );
         
-        if (status != 0) return "N/A";
+        if (!NT_SUCCESS(status) || peb32Address == NULL) {
+            std::cout << "[GetProcessCommandLine] NtQueryInformationProcess failed with status: " << status << std::endl;
+            return "N/A";
+        }
         
         // Read 32-bit PEB
-        PEB32 peb32;
-        SIZE_T bytesRead;
-        if (!ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)pbi32.PebBaseAddress, &peb32, sizeof(peb32), &bytesRead)) {
+        PEB32 peb32 = { 0 };
+        SIZE_T bytesRead = 0;
+        if (!ReadProcessMemory(hProcess, peb32Address, &peb32, sizeof(peb32), &bytesRead)) {
+            DWORD error = GetLastError();
+            std::cout << "[GetProcessCommandLine] Failed to read PEB32, error: " << error << std::endl;
             return "N/A";
         }
         
         // Read 32-bit process parameters
-        RTL_USER_PROCESS_PARAMETERS32 processParams32;
+        RTL_USER_PROCESS_PARAMETERS32 processParams32 = { 0 };
         if (!ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)peb32.ProcessParameters, &processParams32, sizeof(processParams32), &bytesRead)) {
+            DWORD error = GetLastError();
+            std::cout << "[GetProcessCommandLine] Failed to read RTL_USER_PROCESS_PARAMETERS32, error: " << error << std::endl;
             return "N/A";
         }
         
-        if (processParams32.CommandLine.Length == 0 || processParams32.CommandLine.Buffer == 0) return "";
+        // Read CommandLine UNICODE_STRING32
+        UNICODE_STRING32 commandLineUnicode = processParams32.CommandLine;
         
-        std::wstring cmdLine(processParams32.CommandLine.Length / sizeof(WCHAR), L'\0');
-        if (!ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)processParams32.CommandLine.Buffer, &cmdLine[0], processParams32.CommandLine.Length, &bytesRead)) {
+        if (commandLineUnicode.Length == 0 || commandLineUnicode.Buffer == 0) {
+            std::cout << "[GetProcessCommandLine] Command line buffer is empty or null" << std::endl;
+            return "";
+        }
+        
+        std::wstring cmdLine(commandLineUnicode.Length / sizeof(WCHAR), L'\0');
+        if (!ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)commandLineUnicode.Buffer, &cmdLine[0], commandLineUnicode.Length, &bytesRead)) {
+            DWORD error = GetLastError();
+            std::cout << "[GetProcessCommandLine] Failed to read command line buffer, error: " << error << std::endl;
             return "N/A";
         }
         
+        std::cout << "[GetProcessCommandLine] Successfully retrieved command line for 32-bit process" << std::endl;
         return ConvertToString(cmdLine);
     }
 #endif
 
+    std::cout << "[GetProcessCommandLine] Handling native architecture process" << std::endl;
     // Handle 64-bit process (or 32-bit process on 32-bit Windows)
     PROCESS_BASIC_INFORMATION pbi;
     ULONG returnLength;
     
     HMODULE hNtDll = GetModuleHandleW(L"ntdll.dll");
-    if (!hNtDll) return "N/A";
+    if (!hNtDll) {
+        std::cout << "[GetProcessCommandLine] Failed to get ntdll.dll handle" << std::endl;
+        return "N/A";
+    }
     
     auto NtQueryInformationProcess = reinterpret_cast<NtQueryInformationProcessFn>(
         GetProcAddress(hNtDll, "NtQueryInformationProcess")
     );
     
-    if (!NtQueryInformationProcess) return "N/A";
+    if (!NtQueryInformationProcess) {
+        std::cout << "[GetProcessCommandLine] Failed to get NtQueryInformationProcess function" << std::endl;
+        return "N/A";
+    }
     
     NTSTATUS status = NtQueryInformationProcess(
         hProcess,
@@ -589,29 +623,42 @@ std::string ProcessManager::GetProcessCommandLine(HANDLE hProcess) {
         &returnLength
     );
     
-    if (status != 0) return "N/A";
+    if (status != 0) {
+        std::cout << "[GetProcessCommandLine] NtQueryInformationProcess failed with status: " << status << std::endl;
+        return "N/A";
+    }
     
     // Read PEB
     PEB peb;
     SIZE_T bytesRead;
     if (!ReadProcessMemory(hProcess, pbi.PebBaseAddress, &peb, sizeof(peb), &bytesRead)) {
+        DWORD error = GetLastError();
+        std::cout << "[GetProcessCommandLine] Failed to read PEB, error: " << error << std::endl;
         return "N/A";
     }
     
     // Read process parameters
     RTL_USER_PROCESS_PARAMETERS processParams;
     if (!ReadProcessMemory(hProcess, peb.ProcessParameters, &processParams, sizeof(processParams), &bytesRead)) {
+        DWORD error = GetLastError();
+        std::cout << "[GetProcessCommandLine] Failed to read RTL_USER_PROCESS_PARAMETERS, error: " << error << std::endl;
         return "N/A";
     }
     
     // Read command line
-    if (processParams.CommandLine.Length == 0 || processParams.CommandLine.Buffer == 0) return "";
+    if (processParams.CommandLine.Length == 0 || processParams.CommandLine.Buffer == 0) {
+        std::cout << "[GetProcessCommandLine] Command line buffer is empty or null" << std::endl;
+        return "";
+    }
     
     std::wstring cmdLine(processParams.CommandLine.Length / sizeof(WCHAR), L'\0');
     if (!ReadProcessMemory(hProcess, processParams.CommandLine.Buffer, &cmdLine[0], processParams.CommandLine.Length, &bytesRead)) {
+        DWORD error = GetLastError();
+        std::cout << "[GetProcessCommandLine] Failed to read command line buffer, error: " << error << std::endl;
         return "N/A";
     }
     
+    std::cout << "[GetProcessCommandLine] Successfully retrieved command line" << std::endl;
     return ConvertToString(cmdLine);
 }
 
@@ -763,15 +810,13 @@ bool ProcessManager::InjectProtectionDLL(DWORD pid, std::string& errorMsg) {
         return false;
     }
     
-    // Get the full path of the DLL relative to the executable
-    wchar_t exePath[MAX_PATH];
-    GetModuleFileNameW(NULL, exePath, MAX_PATH);
-    std::wstring dllPath = std::filesystem::path(exePath).parent_path() / L"protection_dll.dll";
+    // Get the full path of the DLL
+    std::filesystem::path dllPath = L"C:\\Users\\BK\\Documents\\GitHub\\WPP\\build\\protection_dll\\Release\\protection_dll.dll";
 
-    std::wcout << L"DLL Path: " << dllPath << std::endl;
+    std::wcout << L"DLL Path: " << dllPath.wstring() << std::endl;
     
     if (!std::filesystem::exists(dllPath)) {
-        errorMsg = "Protection DLL not found at: " + std::filesystem::path(dllPath).string();
+        errorMsg = "Protection DLL not found at: " + dllPath.string();
         std::cout << "Error: " << errorMsg << std::endl;
         return false;
     }
@@ -829,7 +874,7 @@ bool ProcessManager::InjectProtectionDLL(DWORD pid, std::string& errorMsg) {
     }
 
     // First allocate memory for the DLL path
-    size_t dllPathSize = (dllPath.length() + 1) * sizeof(wchar_t);
+    size_t dllPathSize = (dllPath.wstring().length() + 1) * sizeof(wchar_t);
     LPVOID dllPathAddr = VirtualAllocEx(hProcess, NULL, dllPathSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (dllPathAddr == NULL) {
         DWORD error = GetLastError();
@@ -852,7 +897,7 @@ bool ProcessManager::InjectProtectionDLL(DWORD pid, std::string& errorMsg) {
     }
 
     // Write the DLL path to the allocated memory
-    if (!WriteProcessMemory(hProcess, dllPathAddr, dllPath.c_str(), dllPathSize, NULL)) {
+    if (!WriteProcessMemory(hProcess, dllPathAddr, dllPath.wstring().c_str(), dllPathSize, NULL)) {
         DWORD error = GetLastError();
         LPVOID lpMsgBuf;
         FormatMessage(
@@ -957,7 +1002,7 @@ bool ProcessManager::InjectProtectionDLL(DWORD pid, std::string& errorMsg) {
         BOOL isTarget64Bit = FALSE;
         
         // Check if we can access the DLL file
-        HANDLE hFile = CreateFileW(dllPath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+        HANDLE hFile = CreateFileW(dllPath.wstring().c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
         if (hFile == INVALID_HANDLE_VALUE) {
             error = GetLastError();
         } else {
@@ -1122,27 +1167,75 @@ SIZE_T ProcessManager::GetProcessPrivateWorkingSet(HANDLE hProcess) {
 }
 
 bool ProcessManager::IsProcess64Bit(HANDLE process) {
-    BOOL isWow64;
-    SYSTEM_INFO systemInfo;
-    GetNativeSystemInfo(&systemInfo);
-    bool isSystem64Bit = (systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64);
+    BOOL isWow64 = FALSE;
+    USHORT processMachine = IMAGE_FILE_MACHINE_UNKNOWN;
+    USHORT nativeMachine = IMAGE_FILE_MACHINE_UNKNOWN;
 
-    // First check if we're on a 64-bit system
-    if (!isSystem64Bit) {
-        return false;  // On 32-bit Windows, all processes are 32-bit
-    }
-
-    // Check if the process is running under WOW64
-    if (!IsWow64Process(process, &isWow64)) {
-        // If we can't determine, check if it's a system process
-        DWORD pid = GetProcessId(process);
-        if (pid == 0 || pid == 4) {  // System Idle Process (0) and System Process (4)
-            return true;  // These are native 64-bit on 64-bit Windows
+    // Try to use IsWow64Process2 if available (Windows 10 and later)
+    HMODULE hKernel32 = GetModuleHandleW(L"kernel32.dll");
+    if (hKernel32) {
+        typedef BOOL(WINAPI* LPFN_ISWOW64PROCESS2)(HANDLE, USHORT*, USHORT*);
+        LPFN_ISWOW64PROCESS2 fnIsWow64Process2 = reinterpret_cast<LPFN_ISWOW64PROCESS2>(
+            GetProcAddress(hKernel32, "IsWow64Process2")
+        );
+        if (fnIsWow64Process2) {
+            if (fnIsWow64Process2(process, &processMachine, &nativeMachine)) {
+                // Check if the process is running under WOW64 emulation
+                if (processMachine == IMAGE_FILE_MACHINE_UNKNOWN || processMachine == nativeMachine) {
+                    // Process and system architectures are the same
+                    if (nativeMachine == IMAGE_FILE_MACHINE_AMD64 ||
+                        nativeMachine == IMAGE_FILE_MACHINE_ARM64 ||
+                        nativeMachine == IMAGE_FILE_MACHINE_IA64) {
+                        // 64-bit process
+                        return true;
+                    } else {
+                        // 32-bit process
+                        return false;
+                    }
+                } else {
+                    // Process is running under emulation (WOW64), so it's 32-bit
+                    return false;
+                }
+            }
         }
-        return true;  // Default to 64-bit if we can't determine on 64-bit Windows
     }
 
-    return !isWow64;  // If isWow64 is TRUE, it's 32-bit, otherwise 64-bit
+    // Fallback to IsWow64Process for earlier Windows versions
+    if (IsWow64Process(process, &isWow64)) {
+        if (isWow64) {
+            // Process is running under WOW64, so it's 32-bit
+            return false;
+        } else {
+            // Process is not running under WOW64
+            // Determine system architecture
+            SYSTEM_INFO systemInfo = { 0 };
+            GetNativeSystemInfo(&systemInfo);
+
+            if (systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ||
+                systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64 ||
+                systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM64) {
+                // System is 64-bit, so the process is also 64-bit
+                return true;
+            } else {
+                // System is 32-bit, so the process is 32-bit
+                return false;
+            }
+        }
+    }
+
+    // If we can't determine, check if it's a system process
+    DWORD pid = GetProcessId(process);
+    if (pid == 0 || pid == 4) {  // System Idle Process (0) and System Process (4)
+        // These are always native processes, so on 64-bit Windows they're 64-bit
+        SYSTEM_INFO systemInfo = { 0 };
+        GetNativeSystemInfo(&systemInfo);
+        return (systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ||
+                systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64 ||
+                systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM64);
+    }
+
+    // Unable to determine, assume 32-bit for safety
+    return false;
 }
 
 std::string ProcessManager::GetProcessUsername(HANDLE hProcess) {
@@ -1253,38 +1346,70 @@ std::string ProcessManager::ConvertToString(const std::wstring& wstr) {
 }
 
 ProcessInfo ProcessManager::GetProcessDetails(DWORD pid) {
+    std::cout << "\n[GetProcessDetails] Starting process details retrieval for PID: " << pid << std::endl;
     ProcessInfo info;
     info.pid = pid;
 
+    // First, get process architecture using just PROCESS_QUERY_INFORMATION
+    HANDLE hArchProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+    if (hArchProcess) {
+        info.is64Bit = IsProcess64Bit(hArchProcess);
+        std::cout << "[GetProcessDetails] Process architecture: " << (info.is64Bit ? "64-bit" : "32-bit") << std::endl;
+        CloseHandle(hArchProcess);
+    } else {
+        // If we can't get PROCESS_QUERY_INFORMATION, try with limited info
+        hArchProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+        if (hArchProcess) {
+            info.is64Bit = IsProcess64Bit(hArchProcess);
+            std::cout << "[GetProcessDetails] Process architecture (limited access): " << (info.is64Bit ? "64-bit" : "32-bit") << std::endl;
+            CloseHandle(hArchProcess);
+        } else {
+            info.is64Bit = false; // Default to 32-bit if we can't determine
+            std::cout << "[GetProcessDetails] Failed to determine process architecture, defaulting to 32-bit" << std::endl;
+        }
+    }
+
+    // Now open with full access rights needed for process details
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
     if (!hProcess) {
-        hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+        DWORD error = GetLastError();
+        std::cout << "[GetProcessDetails] Failed to open process with full access, error: " << error << ". Trying limited access..." << std::endl;
+        
+        hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ, FALSE, pid);
         if (!hProcess) {
+            error = GetLastError();
+            std::cout << "[GetProcessDetails] Failed to open process with limited access, error: " << error << std::endl;
             info.name = "N/A";
             info.imagePath = "N/A";
             return info;
         }
+        std::cout << "[GetProcessDetails] Successfully opened process with limited access" << std::endl;
+    } else {
+        std::cout << "[GetProcessDetails] Successfully opened process with full access" << std::endl;
     }
-
-    bool is64Bit = IsProcess64Bit(hProcess);
-    info.is64Bit = is64Bit;
 
     // Get process name and path
     WCHAR pathW[MAX_PATH] = {0};
     DWORD pathSize = MAX_PATH;
 
     if (!QueryFullProcessImageNameW(hProcess, 0, pathW, &pathSize)) {
-        // If QueryFullProcessImageNameW fails, try GetModuleFileNameExW
+        DWORD error = GetLastError();
+        std::cout << "[GetProcessDetails] QueryFullProcessImageNameW failed, error: " << error << ". Trying GetModuleFileNameExW..." << std::endl;
+        
         if (!GetModuleFileNameExW(hProcess, nullptr, pathW, MAX_PATH)) {
+            error = GetLastError();
+            std::cout << "[GetProcessDetails] GetModuleFileNameExW failed, error: " << error << std::endl;
+            
             // If both methods fail for 32-bit process, try using NtQueryInformationProcess
-            if (!is64Bit) {
+            if (!info.is64Bit) {
+                std::cout << "[GetProcessDetails] Attempting to get path using NtQueryInformationProcess for 32-bit process..." << std::endl;
 #ifdef _WIN64
                 PROCESS_BASIC_INFORMATION32 pbi32;
                 ULONG returnLength;
 
                 HMODULE hNtDll = GetModuleHandleW(L"ntdll.dll");
                 if (hNtDll) {
-                    auto NtWow64QueryInformationProcess32 = reinterpret_cast<NtWow64QueryInformationProcess64Fn>(
+                    auto NtWow64QueryInformationProcess32 = reinterpret_cast<NtWow64QueryInformationProcess32Fn>(
                         GetProcAddress(hNtDll, "NtWow64QueryInformationProcess32")
                     );
 
@@ -1297,28 +1422,48 @@ ProcessInfo ProcessManager::GetProcessDetails(DWORD pid) {
                             &returnLength
                         );
 
-                        if (status == 0) {
+                        if (status != 0) {
+                            std::cout << "[GetProcessDetails] NtWow64QueryInformationProcess32 failed, status: " << status << std::endl;
+                        } else {
+                            std::cout << "[GetProcessDetails] Successfully got process information, reading PEB..." << std::endl;
+                            
                             // Read 32-bit PEB
                             PEB32 peb32;
                             SIZE_T bytesRead;
-                            if (ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)pbi32.PebBaseAddress, &peb32, sizeof(peb32), &bytesRead)) {
+                            if (!ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)pbi32.PebBaseAddress, &peb32, sizeof(peb32), &bytesRead)) {
+                                error = GetLastError();
+                                std::cout << "[GetProcessDetails] Failed to read PEB, error: " << error << std::endl;
+                            } else {
                                 // Read 32-bit process parameters
                                 RTL_USER_PROCESS_PARAMETERS32 processParams32;
-                                if (ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)peb32.ProcessParameters, &processParams32, sizeof(processParams32), &bytesRead)) {
+                                if (!ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)peb32.ProcessParameters, &processParams32, sizeof(processParams32), &bytesRead)) {
+                                    error = GetLastError();
+                                    std::cout << "[GetProcessDetails] Failed to read process parameters, error: " << error << std::endl;
+                                } else {
                                     if (processParams32.ImagePathName.Length > 0 && processParams32.ImagePathName.Buffer != 0) {
                                         std::wstring imagePath(processParams32.ImagePathName.Length / sizeof(WCHAR), L'\0');
-                                        if (ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)processParams32.ImagePathName.Buffer, &imagePath[0], processParams32.ImagePathName.Length, &bytesRead)) {
+                                        if (!ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)processParams32.ImagePathName.Buffer, &imagePath[0], processParams32.ImagePathName.Length, &bytesRead)) {
+                                            error = GetLastError();
+                                            std::cout << "[GetProcessDetails] Failed to read image path, error: " << error << std::endl;
+                                        } else {
                                             wcscpy_s(pathW, MAX_PATH, imagePath.c_str());
+                                            std::cout << "[GetProcessDetails] Successfully retrieved image path using PEB method" << std::endl;
                                         }
+                                    } else {
+                                        std::cout << "[GetProcessDetails] Image path information is empty in process parameters" << std::endl;
                                     }
                                 }
                             }
+#endif
                         }
                     }
-#endif
                 }
             }
+        } else {
+            std::cout << "[GetProcessDetails] Successfully got process path using GetModuleFileNameExW" << std::endl;
         }
+    } else {
+        std::cout << "[GetProcessDetails] Successfully got process path using QueryFullProcessImageNameW" << std::endl;
     }
 
     if (pathW[0] != L'\0') {
@@ -1328,8 +1473,11 @@ ProcessInfo ProcessManager::GetProcessDetails(DWORD pid) {
         size_t pos = wpath.find_last_of(L"\\");
         if (pos != std::wstring::npos) {
             info.name = ConvertToString(wpath.substr(pos + 1));
+            std::cout << "[GetProcessDetails] Process name: " << info.name << std::endl;
+            std::cout << "[GetProcessDetails] Image path: " << info.imagePath << std::endl;
         }
     } else {
+        std::cout << "[GetProcessDetails] Path retrieval failed, attempting to get name from process handle..." << std::endl;
         // If we still don't have a name, try to get it from the process handle
         HMODULE hMod;
         DWORD cbNeeded;
@@ -1338,27 +1486,50 @@ ProcessInfo ProcessManager::GetProcessDetails(DWORD pid) {
             if (GetModuleBaseNameW(hProcess, hMod, szModName, sizeof(szModName)/sizeof(WCHAR))) {
                 info.name = ConvertToString(szModName);
                 info.imagePath = info.name;  // Use name as path if we couldn't get the full path
+                std::cout << "[GetProcessDetails] Got process name from module: " << info.name << std::endl;
             } else {
+                DWORD error = GetLastError();
+                std::cout << "[GetProcessDetails] GetModuleBaseNameW failed, error: " << error << std::endl;
                 info.name = "N/A";
                 info.imagePath = "N/A";
             }
         } else {
+            DWORD error = GetLastError();
+            std::cout << "[GetProcessDetails] EnumProcessModules failed, error: " << error << std::endl;
             info.name = "N/A";
             info.imagePath = "N/A";
         }
     }
 
     // Get other process details
+    std::cout << "[GetProcessDetails] Retrieving additional process information..." << std::endl;
+    
     info.username = GetProcessUsername(hProcess);
+    std::cout << "[GetProcessDetails] Username: " << info.username << std::endl;
+    
     info.cpuUsage = GetProcessCpuUsage(hProcess);
+    std::cout << "[GetProcessDetails] CPU Usage: " << info.cpuUsage << "%" << std::endl;
+    
     info.workingSetPrivate = GetProcessPrivateWorkingSet(hProcess);
+    std::cout << "[GetProcessDetails] Private Working Set: " << info.workingSetPrivate << " bytes" << std::endl;
+    
     info.commandLine = GetProcessCommandLine(hProcess);
+    std::cout << "[GetProcessDetails] Command Line: " << (info.commandLine.empty() ? "N/A" : info.commandLine) << std::endl;
+    
     info.status = GetProcessStatus(hProcess);
+    std::cout << "[GetProcessDetails] Process Status: " << info.status << std::endl;
+    
     info.isProtected = IsProcessProtected(pid);
+    std::cout << "[GetProcessDetails] Protected: " << (info.isProtected ? "Yes" : "No") << std::endl;
+    
     info.iconBase64 = GetProcessIconBase64(pid);
+    std::cout << "[GetProcessDetails] Icon retrieved: " << (!info.iconBase64.empty() ? "Yes" : "No") << std::endl;
+    
     info.hasVisibleWindow = HasVisibleWindow(pid);
+    std::cout << "[GetProcessDetails] Has Visible Window: " << (info.hasVisibleWindow ? "Yes" : "No") << std::endl;
 
     CloseHandle(hProcess);
+    std::cout << "[GetProcessDetails] Process details retrieval completed for PID: " << pid << "\n" << std::endl;
     return info;
 }
 
@@ -1384,4 +1555,48 @@ bool ProcessManager::HasVisibleWindow(DWORD pid) {
     DWORD processId = pid;
     EnumWindows(EnumWindowsCallback, (LPARAM)&processId);
     return processId == 0;  // If processId is 0, we found a window
+}
+
+// Function to enable SeDebugPrivilege
+bool ProcessManager::EnableDebugPrivilege() {
+    HANDLE hToken;
+    TOKEN_PRIVILEGES tkp;
+
+    // Open the process token for the current process
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
+        std::cout << "[EnableDebugPrivilege] OpenProcessToken failed. Error: " << GetLastError() << std::endl;
+        return false;
+    }
+
+    // Get the LUID for SeDebugPrivilege
+    if (!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &tkp.Privileges[0].Luid)) {
+        std::cout << "[EnableDebugPrivilege] LookupPrivilegeValue failed. Error: " << GetLastError() << std::endl;
+        CloseHandle(hToken);
+        return false;
+    }
+
+    tkp.PrivilegeCount = 1;  // One privilege to set
+    tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+    // Adjust the token privileges to enable SeDebugPrivilege
+    if (!AdjustTokenPrivileges(hToken, FALSE, &tkp, sizeof(tkp), NULL, NULL)) {
+        std::cout << "[EnableDebugPrivilege] AdjustTokenPrivileges failed. Error: " << GetLastError() << std::endl;
+        CloseHandle(hToken);
+        return false;
+    }
+
+    DWORD error = GetLastError();
+    if (error == ERROR_NOT_ALL_ASSIGNED) {
+        std::cout << "[EnableDebugPrivilege] The token does not have the specified privilege. Error: " << error << std::endl;
+        CloseHandle(hToken);
+        return false;
+    } else if (error != ERROR_SUCCESS) {
+        std::cout << "[EnableDebugPrivilege] AdjustTokenPrivileges returned error: " << error << std::endl;
+        CloseHandle(hToken);
+        return false;
+    }
+
+    std::cout << "[EnableDebugPrivilege] SeDebugPrivilege enabled successfully." << std::endl;
+    CloseHandle(hToken);
+    return true;
 }

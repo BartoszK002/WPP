@@ -238,8 +238,14 @@ async function protectProcess(pid, processName) {
                 `Process "${processName}" (PID: ${pid}) protected successfully.`,
                 'success'
             );
-            // Refresh the process list to show updated protection status
+            
+            // Force an immediate update of the process list
             await updateProcessList();
+            
+            // Update the process details modal if it's open for this process
+            if (activeProcessPid === pid) {
+                await updateProcessDetails(pid);
+            }
         } else {
             let errorMessage = `Failed to protect process "${processName}" (PID: ${pid})\n`;
             if (data.error) {

@@ -245,6 +245,13 @@ int main() {
     httplib::Server svr;
     ProcessManager pm;
 
+    // Enable debug privilege
+    if (!ProcessManager::EnableDebugPrivilege()) {
+        std::cout << "Warning: Failed to enable debug privilege. Some process information may be limited." << std::endl;
+    } else {
+        std::cout << "Successfully enabled debug privilege." << std::endl;
+    }
+
     // Get the executable directory
     char exePath[MAX_PATH];
     GetModuleFileNameA(NULL, exePath, MAX_PATH);

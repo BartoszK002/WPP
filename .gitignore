@@ -1,0 +1,125 @@
+# Build directories
+build/
+out/
+Debug/
+Release/
+x64/
+x86/
+Win32/
+
+# Compiled files
+*.exe
+*.dll
+*.lib
+*.pdb
+*.ilk
+*.exp
+*.obj
+*.iobj
+*.ipdb
+*.log
+*.tlog
+*.lastbuildstate
+*.recipe
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.cmake
+!CMakeLists.txt
+
+# IDE specific files
+.vs/
+.vscode/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.VC.opendb
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Dependency directories
+vcpkg/
+packages/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Debug symbols
+*.pdb
+
+# Code coverage
+*.gcno
+*.gcda
+*.gcov
+
+# Visual Studio Code specific files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Windows specific
+[Dd]esktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+~*
+*~
+
+# Node modules and package files (if any are used for the web UI)
+node_modules/
+package-lock.json
+
+# Explicitly keep source files (just to be clear)
+!*.cpp
+!*.h
+!*.hpp
+!*.c
+!*.js
+!*.css
+!*.html
+!*.htm
+!*.json
+!*.md
+!*.txt
+!*.cmake
+!*.png
+!*.ico
+!*.svg
+!*.jpg
+!*.jpeg
+!*.gif
+!*.webp
+!*.woff
+!*.woff2
+!*.ttf
+!*.eot
