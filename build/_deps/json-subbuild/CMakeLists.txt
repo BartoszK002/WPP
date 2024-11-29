@@ -16,10 +16,18 @@ unset(ENV{CMAKE_TOOLCHAIN_FILE})
 project(json-populate NONE)
 
 
+# Pass through things we've already detected in the main project to avoid
+# paying the cost of redetecting them again in ExternalProject_Add()
+set(GIT_EXECUTABLE [==[C:/Program Files/Git/cmd/git.exe]==])
+set(GIT_VERSION_STRING [==[2.44.0.windows.1]==])
+set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
+  [==[C:/Program Files/Git/cmd/git.exe;2.44.0.windows.1]==]
+)
+
 
 include(ExternalProject)
 ExternalProject_Add(json-populate
-                     "UPDATE_DISCONNECTED" "False" "EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR" "URL" "https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp" "DOWNLOAD_DIR" "C:/Users/BK/Documents/GitHub/WPP/build/web_ui/include/nlohmann" DOWNLOAD_NO_EXTRACT YES
+                     "UPDATE_DISCONNECTED" "False" "GIT_REPOSITORY" "https://github.com/nlohmann/json.git" "EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR" "GIT_TAG" "v3.11.3"
                     SOURCE_DIR          "C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-src"
                     BINARY_DIR          "C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-build"
                     CONFIGURE_COMMAND   ""
@@ -31,16 +39,4 @@ ExternalProject_Add(json-populate
                     USES_TERMINAL_PATCH     YES
 )
 
-
-ExternalProject_Get_Property(json-populate DOWNLOADED_FILE)
-get_filename_component(dlFileName "${DOWNLOADED_FILE}" NAME)
-
-ExternalProject_Add_Step(json-populate copyfile
-  COMMAND    "C:/Program Files/CMake/bin/cmake.exe" -E copy_if_different
-             "<DOWNLOADED_FILE>" "C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-src"
-  DEPENDEES  patch
-  DEPENDERS  configure
-  BYPRODUCTS "C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-src/${dlFileName}"
-  COMMENT    "Copying file to SOURCE_DIR"
-)
 

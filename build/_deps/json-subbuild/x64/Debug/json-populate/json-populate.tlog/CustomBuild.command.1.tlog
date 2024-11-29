@@ -16,9 +16,7 @@ cd C:\Users\BK\Documents\GitHub\WPP\build\_deps
 if %errorlevel% neq 0 goto :cmEnd
 C:
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE -P C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/download-json-populate.cmake
-if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE -P C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/verify-json-populate.cmake
+"C:\Program Files\CMake\bin\cmake.exe" -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE -P C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-subbuild/json-populate-prefix/tmp/json-populate-gitclone.cmake
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/Debug/json-populate-download
 if %errorlevel% neq 0 goto :cmEnd
@@ -30,9 +28,11 @@ exit /b %1
 if %errorlevel% neq 0 goto :VCEnd
 ^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\JSON-SUBBUILD\CMAKEFILES\31B0B93F593DC1D8ADA1D1CF66B153BB\JSON-POPULATE-UPDATE.RULE
 setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+cd C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/Debug/json-populate-update
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -Dcan_fetch=YES -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE -P C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-subbuild/json-populate-prefix/tmp/json-populate-gitupdate.cmake
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
@@ -45,18 +45,6 @@ setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E echo_append
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/Debug/json-populate-patch
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd
-^C:\USERS\BK\DOCUMENTS\GITHUB\WPP\BUILD\_DEPS\JSON-SUBBUILD\CMAKEFILES\31B0B93F593DC1D8ADA1D1CF66B153BB\JSON-POPULATE-COPYFILE.RULE
-setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/BK/Documents/GitHub/WPP/build/web_ui/include/nlohmann/json.hpp C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-src
-if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/Debug/json-populate-copyfile
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone

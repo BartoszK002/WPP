@@ -547,3 +547,177 @@ button[type="button"].search-clear-button:hover {
         opacity: 1;
     }
 }
+
+.process-controls {
+    padding: 10px 20px;
+    display: flex;
+    gap: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.control-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.control-btn i {
+    font-size: 18px;
+}
+
+.control-btn.danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.control-btn.danger:hover {
+    background-color: #c82333;
+}
+
+.control-btn.warning {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.control-btn.warning:hover {
+    background-color: #e0a800;
+}
+
+.control-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.modules-list {
+    max-height: 70vh;
+    overflow-y: auto;
+    margin: 10px 0;
+}
+
+#modulesModal .modal-content {
+    min-width: 900px;
+    width: 80%;
+    max-width: 95vw;
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    resize: both;
+    overflow: auto;
+    cursor: move;
+    min-height: 400px;
+    max-height: 90vh;
+}
+
+#modulesModal .modal-content:hover {
+    outline: 1px solid var(--accent-color);
+}
+
+#modulesModal .modal-content .resize-handle {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    height: 20px;
+    cursor: se-resize;
+}
+
+#modulesModal .modal-header {
+    cursor: move;
+    user-select: none;
+}
+
+.modules-list table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.modules-list th {
+    position: sticky;
+    top: 0;
+    background-color: var(--secondary-bg);
+    z-index: 1;
+    padding: 12px;
+}
+
+.modules-list th:nth-child(1) { width: 15%; }  /* Name */
+.modules-list th:nth-child(2) { width: 15%; }  /* Base Address */
+.modules-list th:nth-child(3) { width: 10%; }  /* Size */
+.modules-list th:nth-child(4) { width: 25%; }  /* Description */
+.modules-list th:nth-child(5) { width: 35%; }  /* Path */
+
+.modules-list td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.expandable-cell {
+    position: relative;
+}
+
+.expandable-cell .text-content {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.expandable-cell.expanded .text-content {
+    white-space: normal;
+    word-break: break-all;
+}
+
+.path-cell {
+    max-width: 400px;
+}
+
+.control-btn.info {
+    background-color: #0078d4;
+    color: white;
+}
+
+.control-btn.info:hover {
+    background-color: #006cbd;
+}
+
+#modulesModal .modules-list {
+    cursor: default;
+}
+
+.protect-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.protect-btn:hover {
+    background-color: #0066b8;
+}
+
+.unprotect-btn {
+    background-color: #6c757d;  /* Different color for unprotect */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.unprotect-btn:hover {
+    background-color: #5a6268;
+}

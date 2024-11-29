@@ -6,11 +6,29 @@ if(MSVC)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
 endif()
 
-add_executable(web_ui
-    src/main.cpp
-    src/process_manager.cpp
-    src/lodepng.cpp
+# Add source files
+set(PROCESS_MANAGER_SOURCES
+    src/process_manager/base.cpp
+    src/process_manager/icon_manager.cpp
+    src/process_manager/process_info.cpp
+    src/process_manager/process_manager.cpp
+    src/process_manager/system_info.cpp
+)
+
+set(PROCESS_MANAGER_HEADERS
     include/process_manager.h
+    include/process_manager/base.h
+    include/process_manager/icon_manager.h
+    include/process_manager/process_info.h
+    include/process_manager/system_info.h
+    include/process_manager/windows_api.h
+)
+
+add_executable(web_ui
+    ${PROCESS_MANAGER_SOURCES}
+    ${PROCESS_MANAGER_HEADERS}
+    src/main.cpp
+    src/lodepng.cpp
 )
 
 if(MSVC)
@@ -32,17 +50,36 @@ FetchContent_MakeAvailable(httplib)
 # Add nlohmann/json (header-only)
 FetchContent_Declare(
     json
-    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp
-    DOWNLOAD_NO_EXTRACT TRUE
-    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/include/nlohmann
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.3
 )
 FetchContent_MakeAvailable(json)
 
-target_link_libraries(web_ui PRIVATE httplib::httplib)
-target_include_directories(web_ui 
-    PRIVATE 
+target_include_directories(web_ui
+    PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_BINARY_DIR}/include  # For nlohmann/json.hpp
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_BINARY_DIR}/_deps/json-src/include
+)
+
+# Link required libraries
+target_link_libraries(web_ui
+    PRIVATE
+        gdiplus
+        psapi
+        ntdll
+        comctl32
+        httplib::httplib
+        nlohmann_json::nlohmann_json
+        version
+)
+
+# Add compile definitions
+target_compile_definitions(web_ui
+    PRIVATE
+        UNICODE
+        _UNICODE
 )
 
 # Copy static files to build directory

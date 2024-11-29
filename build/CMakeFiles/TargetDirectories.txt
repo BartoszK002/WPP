@@ -7,3 +7,5 @@ C:/Users/BK/Documents/GitHub/WPP/build/web_ui/CMakeFiles/web_ui.dir
 C:/Users/BK/Documents/GitHub/WPP/build/web_ui/CMakeFiles/INSTALL.dir
 C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-build/CMakeFiles/INSTALL.dir
 C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-build/CMakeFiles/ALL_BUILD.dir
+C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-build/CMakeFiles/INSTALL.dir
+C:/Users/BK/Documents/GitHub/WPP/build/_deps/json-build/CMakeFiles/ALL_BUILD.dir

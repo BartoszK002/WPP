@@ -243,10 +243,10 @@ void SendHTML(httplib::Response& res) {
 
 int main() {
     httplib::Server svr;
-    ProcessManager pm;
+    process_manager::ProcessManager pm;
 
     // Enable debug privilege
-    if (!ProcessManager::EnableDebugPrivilege()) {
+    if (!process_manager::SystemInfo::EnableDebugPrivilege()) {
         std::cout << "Warning: Failed to enable debug privilege. Some process information may be limited." << std::endl;
     } else {
         std::cout << "Successfully enabled debug privilege." << std::endl;
@@ -291,7 +291,10 @@ int main() {
             process["icon"] = proc.iconBase64;
             process["is64Bit"] = proc.is64Bit;
             process["isProtected"] = proc.isProtected;
-            process["isSystemProcess"] = pm.IsWindowsSystemProcess(std::wstring(proc.name.begin(), proc.name.end()), proc.pid);
+            process["isSystemProcess"] = process_manager::ProcessInfoManager::IsWindowsSystemProcess(
+                std::wstring(proc.name.begin(), proc.name.end()), 
+                proc.pid
+            );
             process["hasVisibleWindow"] = proc.hasVisibleWindow;
             j.push_back(process);
         }
@@ -303,8 +306,14 @@ int main() {
     svr.Get(R"(/api/process/(\d+))", [&pm](const httplib::Request& req, httplib::Response& res) {
         auto pid = std::stoi(req.matches[1].str());
         auto procInfo = pm.GetProcessDetails(pid);
+        
+        // Format PID in hex
+        std::stringstream hexPid;
+        hexPid << "0x" << std::uppercase << std::hex << std::setfill('0') << std::setw(4) << procInfo.pid;
+        
         json result = {
             {"pid", procInfo.pid},
+            {"pidHex", hexPid.str()},
             {"name", procInfo.name},
             {"isProtected", procInfo.isProtected},
             {"iconBase64", procInfo.iconBase64},
@@ -314,7 +323,8 @@ int main() {
             {"cpuUsage", procInfo.cpuUsage},
             {"workingSetPrivate", procInfo.workingSetPrivate},
             {"imagePath", procInfo.imagePath},
-            {"commandLine", procInfo.commandLine}
+            {"commandLine", procInfo.commandLine},
+            {"description", procInfo.description}
         };
         res.set_content(result.dump(), "application/json");
     });
@@ -327,7 +337,7 @@ int main() {
         
         if (pm.InjectProtectionDLL(pid, errorMsg)) {
             // Check if the process is actually protected
-            if (pm.IsProcessProtected(pid)) {
+            if (process_manager::ProcessInfoManager::IsProcessProtected(pid)) {
                 json response;
                 response["success"] = true;
                 response["message"] = "Process protected successfully";
@@ -383,6 +393,163 @@ int main() {
             res.set_content(response.dump(), "application/json");
             res.status = 400;
         }
+    });
+
+    // Add these endpoints
+    svr.Post("/api/process/terminate", [](const httplib::Request& req, httplib::Response& res) {
+        auto j = json::parse(req.body);
+        auto pid = j["pid"].get<DWORD>();
+        
+        HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
+        if (hProcess == NULL) {
+            json response = {
+                {"success", false},
+                {"error", "Failed to open process"}
+            };
+            res.set_content(response.dump(), "application/json");
+            return;
+        }
+        
+        if (TerminateProcess(hProcess, 1)) {
+            json response = {{"success", true}};
+            res.set_content(response.dump(), "application/json");
+        } else {
+            json response = {
+                {"success", false},
+                {"error", "Failed to terminate process"}
+            };
+            res.set_content(response.dump(), "application/json");
+        }
+        CloseHandle(hProcess);
+    });
+
+    svr.Post("/api/process/suspend", [](const httplib::Request& req, httplib::Response& res) {
+        auto j = json::parse(req.body);
+        auto pid = j["pid"].get<DWORD>();
+        bool success = process_manager::ProcessInfoManager::SuspendProcess(pid);
+        
+        json response = {
+            {"success", success},
+            {"error", success ? "" : "Failed to suspend process"}
+        };
+        res.set_content(response.dump(), "application/json");
+    });
+
+    svr.Post("/api/process/resume", [](const httplib::Request& req, httplib::Response& res) {
+        auto j = json::parse(req.body);
+        auto pid = j["pid"].get<DWORD>();
+        bool success = process_manager::ProcessInfoManager::ResumeProcess(pid);
+        
+        json response = {
+            {"success", success},
+            {"error", success ? "" : "Failed to resume process"}
+        };
+        res.set_content(response.dump(), "application/json");
+    });
+
+    // Get process modules
+    svr.Get(R"(/api/process/(\d+)/modules)", [](const httplib::Request& req, httplib::Response& res) {
+        auto pid = std::stoi(req.matches[1].str());
+        auto modules = process_manager::ProcessInfoManager::GetProcessModules(pid);
+        
+        json j = json::array();
+        for (const auto& mod : modules) {
+            json module = {
+                {"name", mod.name},
+                {"path", mod.path},
+                {"description", mod.description},
+                {"baseAddress", [&mod]() {
+                    std::stringstream ss;
+                    ss << "0x" << std::uppercase << std::hex << mod.baseAddress;
+                    return ss.str();
+                }()},
+                {"size", mod.size}
+            };
+            j.push_back(module);
+        }
+        
+        res.set_content(j.dump(), "application/json");
+    });
+
+    // Unprotect process
+    svr.Post("/api/unprotect", [](const httplib::Request& req, httplib::Response& res) {
+        auto j = json::parse(req.body);
+        auto pid = j["pid"].get<DWORD>();
+        
+        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+        if (!hProcess) {
+            json response = {
+                {"success", false},
+                {"error", "Failed to open process"}
+            };
+            res.set_content(response.dump(), "application/json");
+            return;
+        }
+        
+        // Find the protection DLL
+        HMODULE hMods[1024];
+        DWORD cbNeeded;
+        bool found = false;
+        HMODULE protectionDll = NULL;
+        
+        if (EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded)) {
+            for (DWORD i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
+                wchar_t szModName[MAX_PATH];
+                if (GetModuleFileNameExW(hProcess, hMods[i], szModName, sizeof(szModName) / sizeof(wchar_t))) {
+                    std::wstring moduleName = szModName;
+                    if (moduleName.find(L"protection_dll.dll") != std::wstring::npos) {
+                        protectionDll = hMods[i];
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        CloseHandle(hProcess);
+        
+        if (!found) {
+            json response = {
+                {"success", false},
+                {"error", "Process is not protected"}
+            };
+            res.set_content(response.dump(), "application/json");
+            return;
+        }
+        
+        // Unload the DLL
+        HANDLE hUnloadProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION | 
+            PROCESS_VM_WRITE | PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, pid);
+        
+        if (!hUnloadProcess) {
+            json response = {
+                {"success", false},
+                {"error", "Failed to open process for unprotection"}
+            };
+            res.set_content(response.dump(), "application/json");
+            return;
+        }
+        
+        LPVOID pFreeLibrary = (LPVOID)GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "FreeLibrary");
+        HANDLE hThread = CreateRemoteThread(hUnloadProcess, NULL, 0, 
+            (LPTHREAD_START_ROUTINE)pFreeLibrary, protectionDll, 0, NULL);
+        
+        if (!hThread) {
+            CloseHandle(hUnloadProcess);
+            json response = {
+                {"success", false},
+                {"error", "Failed to create unload thread"}
+            };
+            res.set_content(response.dump(), "application/json");
+            return;
+        }
+        
+        WaitForSingleObject(hThread, INFINITE);
+        CloseHandle(hThread);
+        CloseHandle(hUnloadProcess);
+        
+        json response = {{"success", true}};
+        res.set_content(response.dump(), "application/json");
     });
 
     std::cout << "Server started on http://localhost:8080" << std::endl;

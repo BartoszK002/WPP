@@ -158,6 +158,12 @@ function applySearchAndSort() {
         const archClass = process.is64Bit ? 'arch-x64' : 'arch-x86';
         const archIcon = `<span class="arch-icon ${archClass}"><i class="material-icons">memory</i>${process.is64Bit ? 'x64' : 'x86'}</span>`;
         
+        const actionButtons = `
+            ${process.isProtected ? 
+                `<button class="unprotect-btn" onclick="unprotectProcess(${process.pid})">Unprotect</button>` : 
+                `<button class="protect-btn" onclick="protectProcess(${process.pid})">Protect</button>`
+            }`;
+        
         return `<tr data-pid="${process.pid}">
             <td title="${process.name}">
                 ${iconHtml}
@@ -167,7 +173,7 @@ function applySearchAndSort() {
             <td>${archIcon}</td>
             <td>${statusIcon}</td>
             <td>
-                ${!process.isProtected ? `<button onclick="protectProcess(${process.pid}, '${process.name}')">Protect</button>` : ''}
+                ${actionButtons}
             </td>
         </tr>`;
     }).join('');
@@ -221,8 +227,12 @@ function sortProcesses(column) {
     applySearchAndSort();
 }
 
-async function protectProcess(pid, processName) {
+async function protectProcess(pid) {
     try {
+        // Get process details first
+        const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+        const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+        
         const response = await fetch('/api/protect', {
             method: 'POST',
             headers: {
@@ -235,19 +245,17 @@ async function protectProcess(pid, processName) {
         
         if (data.success) {
             showNotification(
-                `Process "${processName}" (PID: ${pid}) protected successfully.`,
+                `Process ${processInfo} protected successfully.`,
                 'success'
             );
             
-            // Force an immediate update of the process list
             await updateProcessList();
             
-            // Update the process details modal if it's open for this process
             if (activeProcessPid === pid) {
                 await updateProcessDetails(pid);
             }
         } else {
-            let errorMessage = `Failed to protect process "${processName}" (PID: ${pid})\n`;
+            let errorMessage = `Failed to protect process ${processInfo}\n`;
             if (data.error) {
                 errorMessage += `${data.error}\n`;
             }
@@ -260,7 +268,7 @@ async function protectProcess(pid, processName) {
             showNotification(errorMessage.trim(), 'error');
         }
     } catch (error) {
-        let errorMessage = `Network error while protecting process "${processName}" (PID: ${pid})\n`;
+        let errorMessage = `Network error while protecting process (PID: ${pid})\n`;
         errorMessage += `${error.message}`;
         showNotification(errorMessage, 'error');
     }
@@ -348,10 +356,34 @@ const modalHtml = `
             <h2 id="modalTitle">Process Details</h2>
             <span class="close">&times;</span>
         </div>
+        <div class="process-controls">
+            <button id="btnTerminate" class="control-btn danger">
+                <i class="material-icons">close</i>Terminate Process
+            </button>
+            <button id="btnSuspendResume" class="control-btn warning">
+                <i class="material-icons">pause</i><span>Suspend Process</span>
+            </button>
+            <button id="btnViewModules" class="control-btn info">
+                <i class="material-icons">list</i>View Modules
+            </button>
+        </div>
         <div id="processDetails">
             <table>
-                <tr><td>PID:</td><td id="detailPid"></td></tr>
-                <tr><td>Status:</td><td id="detailStatus"></td></tr>
+                <tr>
+                    <td>PID</td>
+                    <td id="detailPid"></td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td id="detailDescription" class="expandable-cell">
+                        <div class="text-content"></div>
+                        <button class="expand-btn" onclick="toggleExpand(this)">Show More</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td id="detailStatus"></td>
+                </tr>
                 <tr><td>Username:</td><td id="detailUsername"></td></tr>
                 <tr><td>CPU Usage:</td><td id="detailCpu"></td></tr>
                 <tr><td>Memory Usage:</td><td id="detailMemory"></td></tr>
@@ -371,6 +403,31 @@ const modalHtml = `
                 </tr>
                 <tr><td>Architecture:</td><td id="detailArch"></td></tr>
                 <tr><td>Protection:</td><td id="detailProtection"></td></tr>
+            </table>
+        </div>
+        <div class="resize-handle"></div>
+    </div>
+</div>
+
+<div id="modulesModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modulesTitle">Process Modules</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modules-list">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-sort="name">Name</th>
+                        <th data-sort="baseAddress">Base Address</th>
+                        <th data-sort="size">Size</th>
+                        <th data-sort="description">Description</th>
+                        <th data-sort="path">Path</th>
+                    </tr>
+                </thead>
+                <tbody id="modulesList">
+                </tbody>
             </table>
         </div>
         <div class="resize-handle"></div>
@@ -520,10 +577,15 @@ async function updateProcessDetails(pid) {
         const response = await fetch(`/api/process/${pid}`);
         const details = await response.json();
         
+        console.log('Process details received:', details);
+        
         // Only update if this is still the active process
         if (pid === activeProcessPid) {
             document.getElementById('modalTitle').textContent = `Process Details: ${details.name}`;
-            document.getElementById('detailPid').textContent = details.pid;
+            document.getElementById('detailPid').textContent = `${details.pid} (${details.pidHex})`;
+            const descriptionCell = document.querySelector('#detailDescription .text-content');
+            console.log('Setting description:', details.description);
+            descriptionCell.textContent = details.description || 'N/A';
             document.getElementById('detailStatus').textContent = details.status;
             document.getElementById('detailUsername').textContent = details.username;
             document.getElementById('detailCpu').textContent = `${details.cpuUsage.toFixed(1)}%`;
@@ -540,6 +602,15 @@ async function updateProcessDetails(pid) {
             
             // Check for truncated content
             checkTruncation();
+
+            // Update suspend/resume button text based on process status
+            const btnSuspendResume = document.getElementById('btnSuspendResume');
+            const isSuspended = details.status === 'Suspended';
+            const btnIcon = btnSuspendResume.querySelector('i');
+            const btnText = btnSuspendResume.querySelector('span');
+            
+            btnIcon.textContent = isSuspended ? 'play_arrow' : 'pause';
+            btnText.textContent = isSuspended ? 'Resume Process' : 'Suspend Process';
         }
     } catch (error) {
         console.error('Error fetching process details:', error);
@@ -566,6 +637,7 @@ async function showProcessDetails(pid) {
     resizeObserver.observe(modal.querySelector('.modal-content'));
     
     await updateProcessDetails(pid);
+    initializeProcessControls(pid);
     
     // Clear any existing interval
     if (processDetailsInterval) {
@@ -732,3 +804,261 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+async function terminateProcess(pid) {
+    try {
+        // Get process details for the confirmation dialog
+        const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+        const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+        
+        if (confirm(`Are you sure you want to terminate process ${processInfo}?`)) {
+            const response = await fetch('/api/process/terminate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pid })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                showNotification(`Successfully terminated process ${processInfo}`, 'success');
+                modal.style.display = "none";
+            } else {
+                showNotification(`Failed to terminate process ${processInfo}: ${result.error}`, 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Error terminating process:', error);
+        showNotification(`Failed to terminate process (PID: ${pid})`, 'error');
+    }
+}
+
+async function toggleProcessSuspension(pid, isSuspended) {
+    const action = isSuspended ? 'resume' : 'suspend';
+    try {
+        const response = await fetch(`/api/process/${action}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            // Get process details for the notification
+            const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+            const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+            
+            showNotification(
+                `Successfully ${action === 'suspend' ? 'suspended' : 'resumed'} process ${processInfo}`,
+                'success'
+            );
+            await updateProcessDetails(pid);
+            setTimeout(async () => {
+                await updateProcessDetails(pid);
+            }, 500);
+        } else {
+            const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+            const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+            showNotification(
+                `Failed to ${action === 'suspend' ? 'suspend' : 'resume'} process ${processInfo}: ${result.error}`,
+                'error'
+            );
+        }
+    } catch (error) {
+        console.error(`Error ${action}ing process:`, error);
+        showNotification(`Failed to ${action === 'suspend' ? 'suspend' : 'resume'} process (PID: ${pid})`, 'error');
+    }
+}
+
+// Update the process details initialization
+function initializeProcessControls(pid) {
+    const btnTerminate = document.getElementById('btnTerminate');
+    const btnSuspendResume = document.getElementById('btnSuspendResume');
+    
+    btnTerminate.onclick = () => {
+        terminateProcess(pid);
+    };
+    
+    btnSuspendResume.onclick = () => {
+        const isSuspended = btnSuspendResume.querySelector('span').textContent.includes('Resume');
+        toggleProcessSuspension(pid, isSuspended);
+    };
+    
+    const btnViewModules = document.getElementById('btnViewModules');
+    btnViewModules.onclick = () => showModules(pid);
+}
+
+async function showModules(pid) {
+    const modulesModal = document.getElementById('modulesModal');
+    const modulesList = document.getElementById('modulesList');
+    modulesModal.style.display = "block";
+    
+    // Prevent scroll propagation
+    const modulesListDiv = modulesModal.querySelector('.modules-list');
+    modulesListDiv.addEventListener('wheel', (e) => {
+        const maxScroll = modulesListDiv.scrollHeight - modulesListDiv.clientHeight;
+        const currentScroll = modulesListDiv.scrollTop;
+        
+        // Only prevent default if we're not at the top/bottom or scrolling in the available direction
+        if ((currentScroll > 0 && currentScroll < maxScroll) || 
+            (currentScroll === 0 && e.deltaY > 0) || 
+            (currentScroll === maxScroll && e.deltaY < 0)) {
+            e.stopPropagation();
+            e.preventDefault();
+            modulesListDiv.scrollTop += e.deltaY;
+        }
+    }, { passive: false });
+
+    // Get process details for the title
+    const processDetails = await fetch(`/api/process/${pid}`).then(r => r.json());
+    document.getElementById('modulesTitle').textContent = 
+        `Modules - ${processDetails.name} (PID: ${processDetails.pid} / ${processDetails.pidHex})`;
+    
+    // Initialize dragging
+    const modalContent = modulesModal.querySelector('.modal-content');
+    const modalHeader = modalContent.querySelector('.modal-header');
+    
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+    
+    modalHeader.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+    
+    function dragStart(e) {
+        const rect = modalContent.getBoundingClientRect();
+        initialX = e.clientX - rect.left;
+        initialY = e.clientY - rect.top;
+        if (e.target === modalHeader) {
+            isDragging = true;
+        }
+    }
+    
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            const x = e.clientX - initialX;
+            const y = e.clientY - initialY;
+            modalContent.style.left = `${x}px`;
+            modalContent.style.top = `${y}px`;
+        }
+    }
+    
+    function dragEnd(e) {
+        isDragging = false;
+    }
+    
+    try {
+        const response = await fetch(`/api/process/${pid}/modules`);
+        const modules = await response.json();
+        
+        // Add sorting functionality
+        const modulesTable = modulesModal.querySelector('table');
+        modulesTable.querySelectorAll('th').forEach(th => {
+            if (th.dataset.sort) {
+                th.addEventListener('click', () => {
+                    const column = th.dataset.sort;
+                    let isAsc = th.classList.contains('sorted');
+                    isAsc = th.classList.contains('reverse') ? true : !isAsc;
+                    
+                    // Remove sorted class from all headers
+                    modulesTable.querySelectorAll('th').forEach(header => {
+                        header.classList.remove('sorted', 'reverse');
+                    });
+                    
+                    // Sort modules
+                    modules.sort((a, b) => {
+                        let valueA = a[column];
+                        let valueB = b[column];
+                        
+                        if (column === 'size') {
+                            return isAsc ? valueB - valueA : valueA - valueB;
+                        }
+                        if (column === 'baseAddress') {
+                            valueA = parseInt(valueA, 16);
+                            valueB = parseInt(valueB, 16);
+                            return isAsc ? valueB - valueA : valueA - valueB;
+                        }
+                        return isAsc ? 
+                            valueA.localeCompare(valueB) : 
+                            valueB.localeCompare(valueA);
+                    });
+                    
+                    th.classList.add('sorted');
+                    if (!isAsc) th.classList.add('reverse');
+                    
+                    // Update table
+                    updateModulesList(modules);
+                });
+            }
+        });
+        
+        updateModulesList(modules);
+        
+        function updateModulesList(modules) {
+            modulesList.innerHTML = modules.map(module => `
+                <tr>
+                    <td class="expandable-cell">
+                        <div class="text-content">${module.name}</div>
+                        <button class="expand-btn" onclick="toggleExpand(this)">Show More</button>
+                    </td>
+                    <td>${module.baseAddress}</td>
+                    <td>${formatBytes(module.size)}</td>
+                    <td class="expandable-cell">
+                        <div class="text-content">${module.description || 'N/A'}</div>
+                        <button class="expand-btn" onclick="toggleExpand(this)">Show More</button>
+                    </td>
+                    <td class="expandable-cell">
+                        <div class="text-content">${module.path}</div>
+                        <button class="expand-btn" onclick="toggleExpand(this)">Show More</button>
+                    </td>
+                </tr>
+            `).join('');
+            checkTruncation();
+        }
+    } catch (error) {
+        console.error('Error fetching modules:', error);
+        showNotification('Failed to fetch process modules', 'error');
+    }
+}
+
+// Add close handler for modules modal
+document.querySelector('#modulesModal .close').onclick = function() {
+    document.getElementById('modulesModal').style.display = "none";
+};
+
+async function unprotectProcess(pid) {
+    try {
+        const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+        const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+        
+        if (confirm(`Are you sure you want to remove protection from process ${processInfo}?`)) {
+            const response = await fetch('/api/unprotect', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pid })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                showNotification(`Successfully removed protection from process ${processInfo}`, 'success');
+                updateProcessList();
+            } else {
+                showNotification(`Failed to remove protection from process ${processInfo}: ${result.error}`, 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Error unprotecting process:', error);
+        showNotification(`Failed to remove protection from process (PID: ${pid})`, 'error');
+    }
+}

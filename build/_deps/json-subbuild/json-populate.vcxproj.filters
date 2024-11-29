@@ -13,9 +13,6 @@
     <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-subbuild\CMakeFiles\31b0b93f593dc1d8ada1d1cf66b153bb\json-populate-patch.rule">
       <Filter>CMake Rules</Filter>
     </CustomBuild>
-    <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-subbuild\CMakeFiles\31b0b93f593dc1d8ada1d1cf66b153bb\json-populate-copyfile.rule">
-      <Filter>CMake Rules</Filter>
-    </CustomBuild>
     <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-subbuild\CMakeFiles\31b0b93f593dc1d8ada1d1cf66b153bb\json-populate-configure.rule">
       <Filter>CMake Rules</Filter>
     </CustomBuild>

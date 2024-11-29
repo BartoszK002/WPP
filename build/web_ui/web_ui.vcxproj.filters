@@ -1,10 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\main.cpp">
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\process_manager\base.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\process_manager.cpp">
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\process_manager\icon_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\process_manager\process_info.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\process_manager\process_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\process_manager\system_info.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\lodepng.cpp">
@@ -15,9 +27,27 @@
     <ClInclude Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\include\process_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\include\process_manager\base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\include\process_manager\icon_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\include\process_manager\process_info.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\include\process_manager\system_info.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\include\process_manager\windows_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\nlohmann_json.natvis" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

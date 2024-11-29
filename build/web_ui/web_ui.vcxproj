@@ -32,22 +32,22 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -86,7 +86,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\web_ui\src;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-src" /external:I "C:/Program Files/OpenSSL-Win64/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -102,16 +102,16 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;UNICODE;_UNICODE;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;UNICODE;_UNICODE;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\web_ui\src;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\web_ui\src;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -131,7 +131,7 @@ exit /b %1
 if %errorlevel% neq 0 goto :VCEnd</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;cryptui.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MDd\libssl.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MDd\libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalDependencies>gdiplus.lib;psapi.lib;ntdll.lib;comctl32.lib;version.lib;ws2_32.lib;crypt32.lib;cryptui.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MDd\libssl.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MDd\libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64 /MANIFEST:EMBED</AdditionalOptions>
       <EnableUAC>true</EnableUAC>
@@ -149,7 +149,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\web_ui\src;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-src" /external:I "C:/Program Files/OpenSSL-Win64/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -164,18 +164,18 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\web_ui\src;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\web_ui\src;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -195,7 +195,7 @@ exit /b %1
 if %errorlevel% neq 0 goto :VCEnd</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;cryptui.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\libssl.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalDependencies>gdiplus.lib;psapi.lib;ntdll.lib;comctl32.lib;version.lib;ws2_32.lib;crypt32.lib;cryptui.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\libssl.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64 /MANIFEST:EMBED</AdditionalOptions>
       <EnableUAC>true</EnableUAC>
@@ -213,7 +213,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\web_ui\src;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-src" /external:I "C:/Program Files/OpenSSL-Win64/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -228,18 +228,18 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\web_ui\src;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\web_ui\src;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -259,7 +259,7 @@ exit /b %1
 if %errorlevel% neq 0 goto :VCEnd</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;cryptui.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\libssl.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalDependencies>gdiplus.lib;psapi.lib;ntdll.lib;comctl32.lib;version.lib;ws2_32.lib;crypt32.lib;cryptui.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\libssl.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64 /MANIFEST:EMBED</AdditionalOptions>
       <EnableUAC>true</EnableUAC>
@@ -277,7 +277,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\web_ui\src;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-src" /external:I "C:/Program Files/OpenSSL-Win64/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -293,16 +293,16 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CPPHTTPLIB_OPENSSL_SUPPORT;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\web_ui\src;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\BK\Documents\GitHub\WPP\web_ui\include;C:\Users\BK\Documents\GitHub\WPP\web_ui\src;C:\Users\BK\Documents\GitHub\WPP\build\web_ui\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\include;C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-src;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -322,7 +322,7 @@ exit /b %1
 if %errorlevel% neq 0 goto :VCEnd</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;cryptui.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\libssl.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalDependencies>gdiplus.lib;psapi.lib;ntdll.lib;comctl32.lib;version.lib;ws2_32.lib;crypt32.lib;cryptui.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\libssl.lib;C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64 /MANIFEST:EMBED</AdditionalOptions>
       <EnableUAC>true</EnableUAC>
@@ -396,10 +396,21 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\main.cpp" />
-    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\process_manager.cpp" />
-    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\lodepng.cpp" />
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\process_manager\base.cpp" />
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\process_manager\icon_manager.cpp" />
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\process_manager\process_info.cpp" />
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\process_manager\process_manager.cpp" />
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\process_manager\system_info.cpp" />
     <ClInclude Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\include\process_manager.h" />
+    <ClInclude Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\include\process_manager\base.h" />
+    <ClInclude Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\include\process_manager\icon_manager.h" />
+    <ClInclude Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\include\process_manager\process_info.h" />
+    <ClInclude Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\include\process_manager\system_info.h" />
+    <ClInclude Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\include\process_manager\windows_api.h" />
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\main.cpp" />
+    <ClCompile Include="C:\Users\BK\Documents\GitHub\WPP\web_ui\src\lodepng.cpp" />
+    <Natvis Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-src\nlohmann_json.natvis">
+    </Natvis>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

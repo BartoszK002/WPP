@@ -196,7 +196,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
-    <ProjectReference Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\httplib-build\ALL_BUILD.vcxproj">
+    <ProjectReference Include="C:\Users\BK\Documents\GitHub\WPP\build\_deps\json-build\ALL_BUILD.vcxproj">
       <Project>{68EB4EAF-A20C-3C2B-BF0A-C0F9BE4376D5}</Project>
       <Name>ALL_BUILD</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
