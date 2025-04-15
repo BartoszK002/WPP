@@ -403,6 +403,62 @@ const modalHtml = `
                 </tr>
                 <tr><td>Architecture:</td><td id="detailArch"></td></tr>
                 <tr><td>Protection:</td><td id="detailProtection"></td></tr>
+                <tr id="peHeaderRow" style="display:none">
+                    <td>PE Headers:</td>
+                    <td>
+                        <div id="peHeaderStatus">Unknown</div>
+                        <div id="peHeaderControls" style="margin-top: 5px; display: flex; gap: 10px;">
+                            <button id="btnEncryptPE" class="control-btn small-btn success">
+                                <i class="material-icons">lock</i><span>Encrypt</span>
+                            </button>
+                            <button id="btnDecryptPE" class="control-btn small-btn warning">
+                                <i class="material-icons">lock_open</i><span>Decrypt</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr id="memoryScanRow" style="display:none">
+                    <td>Memory Scan Detection:</td>
+                    <td>
+                        <div id="memoryScanStatus">Unknown</div>
+                        <div id="memoryScanControls" style="margin-top: 5px; display: flex; gap: 10px;">
+                            <button id="btnEnableMemoryScan" class="control-btn small-btn success">
+                                <i class="material-icons">security</i><span>Enable</span>
+                            </button>
+                            <button id="btnDisableMemoryScan" class="control-btn small-btn warning">
+                                <i class="material-icons">no_encryption</i><span>Disable</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr id="antiTamperingRow" style="display:none">
+                    <td>Anti-Tampering Protection:</td>
+                    <td>
+                        <div id="antiTamperingStatus">Unknown</div>
+                        <div id="antiTamperingControls" style="margin-top: 5px; display: flex; gap: 10px;">
+                            <button id="btnEnableAntiTampering" class="control-btn small-btn success">
+                                <i class="material-icons">verified_user</i><span>Enable</span>
+                            </button>
+                            <button id="btnDisableAntiTampering" class="control-btn small-btn warning">
+                                <i class="material-icons">block</i><span>Disable</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr id="threadMonitoringRow" style="display:none">
+                    <td>Thread Monitoring:</td>
+                    <td>
+                        <div id="threadMonitoringStatus">Unknown</div>
+                        <div id="threadMonitoringControls" style="margin-top: 5px; display: flex; gap: 10px;">
+                            <button id="btnEnableThreadMonitoring" class="control-btn small-btn success">
+                                <i class="material-icons">visibility</i><span>Enable</span>
+                            </button>
+                            <button id="btnDisableThreadMonitoring" class="control-btn small-btn warning">
+                                <i class="material-icons">visibility_off</i><span>Disable</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
             </table>
         </div>
         <div class="resize-handle"></div>
@@ -453,7 +509,7 @@ const modalStyles = `
         padding: 0;
         border: 1px solid #333;
         width: 90%;
-        max-width: 800px;
+        max-width: 1080px;
         min-width: 400px;
         border-radius: 5px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
@@ -496,7 +552,7 @@ const modalStyles = `
     }
     #processDetails td:first-child {
         font-weight: bold;
-        width: 150px;
+        width: 210px;
         color: #89d4ff;
         white-space: nowrap;
     }
@@ -535,6 +591,69 @@ const modalStyles = `
         color: #fff;
         margin: 0;
         font-size: 1.2em;
+    }
+    .process-controls {
+        padding: 15px 20px;
+        background-color: #252525;
+        border-bottom: 1px solid #333;
+        display: flex;
+        gap: 10px;
+    }
+    .control-btn {
+        background-color: #333;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.2s;
+    }
+    .control-btn.danger {
+        background-color: #d32f2f;
+    }
+    .control-btn.danger:hover {
+        background-color: #b71c1c;
+    }
+    .control-btn.warning {
+        background-color: #f57c00;
+    }
+    .control-btn.warning:hover {
+        background-color: #e65100;
+    }
+    .control-btn.info {
+        background-color: #1976d2;
+    }
+    .control-btn.info:hover {
+        background-color: #0d47a1;
+    }
+    .control-btn.success {
+        background-color: #388e3c;
+    }
+    .control-btn.success:hover {
+        background-color: #1b5e20;
+    }
+    .control-btn.small-btn {
+        padding: 6px 12px;
+        font-size: 0.9em;
+        min-width: 90px;
+        justify-content: center;
+    }
+    .control-btn.small-btn i {
+        font-size: 16px;
+        margin-right: 4px;
+    }
+    .resize-handle {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 16px;
+        height: 16px;
+        cursor: nwse-resize;
+        background: #333;
+        clip-path: polygon(100% 0, 100% 100%, 0 100%);
     }
 `;
 
@@ -600,27 +719,509 @@ async function updateProcessDetails(pid) {
             document.getElementById('detailArch').textContent = details.is64Bit ? '64-bit' : '32-bit';
             document.getElementById('detailProtection').textContent = details.isProtected ? 'Protected' : 'Not Protected';
             
+            // Handle PE header row visibility and controls
+            const peHeaderRow = document.getElementById('peHeaderRow');
+            const memoryScanRow = document.getElementById('memoryScanRow');
+            const antiTamperingRow = document.getElementById('antiTamperingRow');
+            const threadMonitoringRow = document.getElementById('threadMonitoringRow');
+            
+            if (details.isProtected) {
+                peHeaderRow.style.display = ''; // Show the row
+                memoryScanRow.style.display = ''; // Show the row
+                antiTamperingRow.style.display = ''; // Show the row
+                threadMonitoringRow.style.display = ''; // Show the row
+                updatePEHeaderStatus(pid); // Update PE header encryption status
+                updateMemoryScanStatus(pid); // Update memory scan detection status
+                updateAntiTamperingStatus(pid); // Update anti-tampering status
+                updateThreadMonitoringStatus(pid); // Update thread monitoring status
+            } else {
+                peHeaderRow.style.display = 'none'; // Hide the row
+                memoryScanRow.style.display = 'none'; // Hide the row
+                antiTamperingRow.style.display = 'none'; // Hide the row
+                threadMonitoringRow.style.display = 'none'; // Hide the row
+            }
+            
             // Check for truncated content
             checkTruncation();
 
             // Update suspend/resume button text based on process status
             const btnSuspendResume = document.getElementById('btnSuspendResume');
-            const isSuspended = details.status === 'Suspended';
-            const btnIcon = btnSuspendResume.querySelector('i');
-            const btnText = btnSuspendResume.querySelector('span');
+            const buttonText = btnSuspendResume.querySelector('span');
+            const buttonIcon = btnSuspendResume.querySelector('i');
             
-            btnIcon.textContent = isSuspended ? 'play_arrow' : 'pause';
-            btnText.textContent = isSuspended ? 'Resume Process' : 'Suspend Process';
+            if (details.status.toLowerCase().includes('suspended')) {
+                buttonText.textContent = 'Resume Process';
+                buttonIcon.textContent = 'play_arrow';
+                btnSuspendResume.setAttribute('data-action', 'resume');
+            } else {
+                buttonText.textContent = 'Suspend Process';
+                buttonIcon.textContent = 'pause';
+                btnSuspendResume.setAttribute('data-action', 'suspend');
+            }
         }
     } catch (error) {
-        console.error('Error fetching process details:', error);
-        if (error.message.includes('404')) {
-            modal.style.display = "none";
-            clearInterval(processDetailsInterval);
-            processDetailsInterval = null;
-            activeProcessPid = null;
-        }
+        console.error('Error updating process details:', error);
     }
+}
+
+// Get PE header encryption status
+async function updatePEHeaderStatus(pid) {
+    try {
+        const response = await fetch('/api/process/check_pe_headers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        const data = await response.json();
+        
+        const statusElement = document.getElementById('peHeaderStatus');
+        const encryptBtn = document.getElementById('btnEncryptPE');
+        const decryptBtn = document.getElementById('btnDecryptPE');
+        
+        if (data.isEncrypted) {
+            statusElement.textContent = 'Encrypted';
+            statusElement.style.color = '#4caf50'; // Green
+            encryptBtn.disabled = true;
+            decryptBtn.disabled = false;
+        } else {
+            statusElement.textContent = 'Not Encrypted';
+            statusElement.style.color = '#ff9800'; // Orange
+            encryptBtn.disabled = false;
+            decryptBtn.disabled = true;
+        }
+    } catch (error) {
+        console.error('Error getting PE header status:', error);
+        document.getElementById('peHeaderStatus').textContent = 'Status Unknown';
+        document.getElementById('peHeaderStatus').style.color = '#f44336'; // Red
+    }
+}
+
+// Get memory scan detection status
+async function updateMemoryScanStatus(pid) {
+    try {
+        const response = await fetch('/api/process/check_memory_scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        const data = await response.json();
+        
+        const statusElement = document.getElementById('memoryScanStatus');
+        const enableBtn = document.getElementById('btnEnableMemoryScan');
+        const disableBtn = document.getElementById('btnDisableMemoryScan');
+        
+        if (data.isEnabled) {
+            statusElement.textContent = 'Enabled';
+            statusElement.style.color = '#4caf50'; // Green
+            enableBtn.disabled = true;
+            disableBtn.disabled = false;
+        } else {
+            statusElement.textContent = 'Disabled';
+            statusElement.style.color = '#ff9800'; // Orange
+            enableBtn.disabled = false;
+            disableBtn.disabled = true;
+        }
+    } catch (error) {
+        console.error('Error getting memory scan status:', error);
+        document.getElementById('memoryScanStatus').textContent = 'Status Unknown';
+        document.getElementById('memoryScanStatus').style.color = '#f44336'; // Red
+    }
+}
+
+// Get anti-tampering status
+async function updateAntiTamperingStatus(pid) {
+    try {
+        const response = await fetch('/api/process/check_anti_tampering', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        const data = await response.json();
+        
+        const statusElement = document.getElementById('antiTamperingStatus');
+        const enableBtn = document.getElementById('btnEnableAntiTampering');
+        const disableBtn = document.getElementById('btnDisableAntiTampering');
+        
+        if (data.isEnabled) {
+            statusElement.textContent = 'Enabled';
+            statusElement.style.color = '#4caf50'; // Green
+            enableBtn.disabled = true;
+            disableBtn.disabled = false;
+        } else {
+            statusElement.textContent = 'Disabled';
+            statusElement.style.color = '#ff9800'; // Orange
+            enableBtn.disabled = false;
+            disableBtn.disabled = true;
+        }
+    } catch (error) {
+        console.error('Error getting anti-tampering status:', error);
+        document.getElementById('antiTamperingStatus').textContent = 'Status Unknown';
+        document.getElementById('antiTamperingStatus').style.color = '#f44336'; // Red
+    }
+}
+
+// Get thread monitoring status
+async function updateThreadMonitoringStatus(pid) {
+    try {
+        const response = await fetch('/api/process/check_thread_monitoring', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        const data = await response.json();
+        
+        const statusElement = document.getElementById('threadMonitoringStatus');
+        const enableBtn = document.getElementById('btnEnableThreadMonitoring');
+        const disableBtn = document.getElementById('btnDisableThreadMonitoring');
+        
+        if (data.isEnabled) {
+            statusElement.textContent = 'Enabled';
+            statusElement.style.color = '#4caf50'; // Green
+            enableBtn.disabled = true;
+            disableBtn.disabled = false;
+        } else {
+            statusElement.textContent = 'Disabled';
+            statusElement.style.color = '#ff9800'; // Orange
+            enableBtn.disabled = false;
+            disableBtn.disabled = true;
+        }
+    } catch (error) {
+        console.error('Error getting thread monitoring status:', error);
+        document.getElementById('threadMonitoringStatus').textContent = 'Status Unknown';
+        document.getElementById('threadMonitoringStatus').style.color = '#f44336'; // Red
+    }
+}
+
+// Handle PE header encryption
+async function encryptPEHeaders(pid) {
+    try {
+        showLoading();
+        
+        // Get process details for the notification
+        const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+        const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+        
+        const response = await fetch('/api/process/encrypt_pe_headers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.success) {
+            showNotification(`PE Headers encrypted successfully for ${processInfo}`, 'success');
+            updatePEHeaderStatus(pid);
+        } else {
+            showNotification(`Failed to encrypt PE Headers for ${processInfo}: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        hideLoading();
+        console.error('Error encrypting PE headers:', error);
+        showNotification(`Error encrypting PE Headers for process (PID: ${pid})`, 'error');
+    }
+}
+
+// Handle PE header decryption
+async function decryptPEHeaders(pid) {
+    try {
+        showLoading();
+        
+        // Get process details for the notification
+        const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+        const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+        
+        const response = await fetch('/api/process/decrypt_pe_headers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.success) {
+            showNotification(`PE Headers decrypted successfully for ${processInfo}`, 'success');
+            updatePEHeaderStatus(pid);
+        } else {
+            showNotification(`Failed to decrypt PE Headers for ${processInfo}: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        hideLoading();
+        console.error('Error decrypting PE headers:', error);
+        showNotification(`Error decrypting PE Headers for process (PID: ${pid})`, 'error');
+    }
+}
+
+// Enable memory scan detection
+async function enableMemoryScan(pid) {
+    try {
+        showLoading();
+        
+        // Get process details for the notification
+        const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+        const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+        
+        const response = await fetch('/api/process/enable_memory_scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.success) {
+            showNotification(`Memory scan detection enabled successfully for ${processInfo}`, 'success');
+            updateMemoryScanStatus(pid);
+        } else {
+            showNotification(`Failed to enable memory scan detection for ${processInfo}: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        hideLoading();
+        console.error('Error enabling memory scan detection:', error);
+        showNotification(`Error enabling memory scan detection for process (PID: ${pid})`, 'error');
+    }
+}
+
+// Disable memory scan detection
+async function disableMemoryScan(pid) {
+    try {
+        showLoading();
+        
+        // Get process details for the notification
+        const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+        const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+        
+        const response = await fetch('/api/process/disable_memory_scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.success) {
+            showNotification(`Memory scan detection disabled successfully for ${processInfo}`, 'success');
+            updateMemoryScanStatus(pid);
+        } else {
+            showNotification(`Failed to disable memory scan detection for ${processInfo}: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        hideLoading();
+        console.error('Error disabling memory scan detection:', error);
+        showNotification(`Error disabling memory scan detection for process (PID: ${pid})`, 'error');
+    }
+}
+
+// Enable anti-tampering
+async function enableAntiTampering(pid) {
+    try {
+        showLoading();
+        
+        // Get process details for the notification
+        const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+        const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+        
+        const response = await fetch('/api/process/enable_anti_tampering', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.success) {
+            showNotification(`Anti-tampering protection enabled successfully for ${processInfo}`, 'success');
+            updateAntiTamperingStatus(pid);
+        } else {
+            showNotification(`Failed to enable anti-tampering protection for ${processInfo}: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        hideLoading();
+        console.error('Error enabling anti-tampering:', error);
+        showNotification(`Error enabling anti-tampering protection for process (PID: ${pid})`, 'error');
+    }
+}
+
+// Disable anti-tampering
+async function disableAntiTampering(pid) {
+    try {
+        showLoading();
+        
+        // Get process details for the notification
+        const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+        const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+        
+        const response = await fetch('/api/process/disable_anti_tampering', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.success) {
+            showNotification(`Anti-tampering protection disabled successfully for ${processInfo}`, 'success');
+            updateAntiTamperingStatus(pid);
+        } else {
+            showNotification(`Failed to disable anti-tampering protection for ${processInfo}: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        hideLoading();
+        console.error('Error disabling anti-tampering:', error);
+        showNotification(`Error disabling anti-tampering protection for process (PID: ${pid})`, 'error');
+    }
+}
+
+// Enable thread monitoring
+async function enableThreadMonitoring(pid) {
+    try {
+        showLoading();
+        
+        // Get process details for the notification
+        const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+        const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+        
+        const response = await fetch('/api/process/enable_thread_monitoring', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.success) {
+            showNotification(`Thread monitoring enabled successfully for ${processInfo}`, 'success');
+            updateThreadMonitoringStatus(pid);
+        } else {
+            showNotification(`Failed to enable thread monitoring for ${processInfo}: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        hideLoading();
+        console.error('Error enabling thread monitoring:', error);
+        showNotification(`Error enabling thread monitoring for process (PID: ${pid})`, 'error');
+    }
+}
+
+// Disable thread monitoring
+async function disableThreadMonitoring(pid) {
+    try {
+        showLoading();
+        
+        // Get process details for the notification
+        const details = await fetch(`/api/process/${pid}`).then(r => r.json());
+        const processInfo = `${details.name} (PID: ${details.pid} / ${details.pidHex})`;
+        
+        const response = await fetch('/api/process/disable_thread_monitoring', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pid })
+        });
+        
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.success) {
+            showNotification(`Thread monitoring disabled successfully for ${processInfo}`, 'success');
+            updateThreadMonitoringStatus(pid);
+        } else {
+            showNotification(`Failed to disable thread monitoring for ${processInfo}: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        hideLoading();
+        console.error('Error disabling thread monitoring:', error);
+        showNotification(`Error disabling thread monitoring for process (PID: ${pid})`, 'error');
+    }
+}
+
+// Initialize process controls
+function initializeProcessControls(pid) {
+    const btnTerminate = document.getElementById('btnTerminate');
+    const btnSuspendResume = document.getElementById('btnSuspendResume');
+    const btnViewModules = document.getElementById('btnViewModules');
+    const btnEncryptPE = document.getElementById('btnEncryptPE');
+    const btnDecryptPE = document.getElementById('btnDecryptPE');
+    const btnEnableMemoryScan = document.getElementById('btnEnableMemoryScan');
+    const btnDisableMemoryScan = document.getElementById('btnDisableMemoryScan');
+    const btnEnableAntiTampering = document.getElementById('btnEnableAntiTampering');
+    const btnDisableAntiTampering = document.getElementById('btnDisableAntiTampering');
+    const btnEnableThreadMonitoring = document.getElementById('btnEnableThreadMonitoring');
+    const btnDisableThreadMonitoring = document.getElementById('btnDisableThreadMonitoring');
+    
+    btnTerminate.onclick = function() {
+        terminateProcess(pid);
+    };
+    
+    btnSuspendResume.onclick = function() {
+        const action = btnSuspendResume.getAttribute('data-action');
+        toggleProcessSuspension(pid, action === 'resume');
+    };
+    
+    btnViewModules.onclick = function() {
+        showModules(pid);
+    };
+    
+    btnEncryptPE.onclick = function() {
+        encryptPEHeaders(pid);
+    };
+    
+    btnDecryptPE.onclick = function() {
+        decryptPEHeaders(pid);
+    };
+    
+    btnEnableMemoryScan.onclick = function() {
+        enableMemoryScan(pid);
+    };
+    
+    btnDisableMemoryScan.onclick = function() {
+        disableMemoryScan(pid);
+    };
+    
+    btnEnableAntiTampering.onclick = function() {
+        enableAntiTampering(pid);
+    };
+    
+    btnDisableAntiTampering.onclick = function() {
+        disableAntiTampering(pid);
+    };
+    
+    btnEnableThreadMonitoring.onclick = function() {
+        enableThreadMonitoring(pid);
+    };
+    
+    btnDisableThreadMonitoring.onclick = function() {
+        disableThreadMonitoring(pid);
+    };
 }
 
 // Add resize observer to handle window resizing
@@ -871,24 +1472,6 @@ async function toggleProcessSuspension(pid, isSuspended) {
         console.error(`Error ${action}ing process:`, error);
         showNotification(`Failed to ${action === 'suspend' ? 'suspend' : 'resume'} process (PID: ${pid})`, 'error');
     }
-}
-
-// Update the process details initialization
-function initializeProcessControls(pid) {
-    const btnTerminate = document.getElementById('btnTerminate');
-    const btnSuspendResume = document.getElementById('btnSuspendResume');
-    
-    btnTerminate.onclick = () => {
-        terminateProcess(pid);
-    };
-    
-    btnSuspendResume.onclick = () => {
-        const isSuspended = btnSuspendResume.querySelector('span').textContent.includes('Resume');
-        toggleProcessSuspension(pid, isSuspended);
-    };
-    
-    const btnViewModules = document.getElementById('btnViewModules');
-    btnViewModules.onclick = () => showModules(pid);
 }
 
 async function showModules(pid) {

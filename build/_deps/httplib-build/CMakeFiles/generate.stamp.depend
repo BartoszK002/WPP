@@ -1,19 +1,19 @@
 # CMake generation dependency list for this directory.
-C:/Program Files/CMake/share/cmake-3.31/Modules/BasicConfigVersion-SameMinorVersion.cmake.in
-C:/Program Files/CMake/share/cmake-3.31/Modules/CMakePackageConfigHelpers.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/CheckCXXSourceCompiles.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/CheckIncludeFileCXX.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/CheckLibraryExists.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/FindOpenSSL.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/FindPackageMessage.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/FindPkgConfig.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/FindThreads.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/FindZLIB.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/GNUInstallDirs.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/SelectLibraryConfigurations.cmake
-C:/Program Files/CMake/share/cmake-3.31/Modules/WriteBasicConfigVersionFile.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/BasicConfigVersion-SameMinorVersion.cmake.in
+C:/Program Files/CMake/share/cmake-4.0/Modules/CMakePackageConfigHelpers.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/CheckCXXSourceCompiles.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFileCXX.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/CheckLibraryExists.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/FindOpenSSL.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/FindPackageMessage.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/FindPkgConfig.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/FindThreads.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/FindZLIB.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/GNUInstallDirs.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CheckSourceCompiles.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/SelectLibraryConfigurations.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/WriteBasicConfigVersionFile.cmake
 C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-src/CMakeLists.txt
 C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-src/cmake/FindBrotli.cmake
 C:/Users/BK/Documents/GitHub/WPP/build/_deps/httplib-src/httplibConfig.cmake.in

@@ -186,11 +186,11 @@ SIZE_T ProcessInfoManager::GetProcessPrivateWorkingSet(HANDLE hProcess) {
 
 std::string ProcessInfoManager::GetProcessStatus(HANDLE hProcess) {
     DWORD pid = GetProcessId(hProcess);
-    std::cout << "\n[GetProcessStatus] Checking status for PID: " << pid << std::endl;
+    // std::cout << "\n[GetProcessStatus] Checking status for PID: " << pid << std::endl;
 
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
     if (hSnapshot == INVALID_HANDLE_VALUE) {
-        std::cout << "[GetProcessStatus] Failed to create thread snapshot. Error: " << GetLastError() << std::endl;
+        // std::cout << "[GetProcessStatus] Failed to create thread snapshot. Error: " << GetLastError() << std::endl;
         return "Running";
     }
 
@@ -203,69 +203,69 @@ std::string ProcessInfoManager::GetProcessStatus(HANDLE hProcess) {
         do {
             if (te32.th32OwnerProcessID == pid) {
                 threadCount++;
-                std::cout << "[GetProcessStatus] Checking thread " << te32.th32ThreadID << std::endl;
+                // std::cout << "[GetProcessStatus] Checking thread " << te32.th32ThreadID << std::endl;
                 
                 HANDLE hThread = OpenThread(THREAD_QUERY_INFORMATION | THREAD_SUSPEND_RESUME, FALSE, te32.th32ThreadID);
                 if (hThread) {
                     DWORD suspendCount = SuspendThread(hThread);
-                    std::cout << "[GetProcessStatus] Thread " << te32.th32ThreadID 
-                             << " initial suspend count: " << suspendCount << std::endl;
+                    // std::cout << "[GetProcessStatus] Thread " << te32.th32ThreadID 
+                    //          << " initial suspend count: " << suspendCount << std::endl;
                     
                     if (suspendCount != (DWORD)-1) {
                         ResumeThread(hThread);  // Restore the thread state
                         if (suspendCount > 0) {
                             suspendedCount++;
-                            std::cout << "[GetProcessStatus] Thread " << te32.th32ThreadID 
-                                     << " is suspended" << std::endl;
+                            // std::cout << "[GetProcessStatus] Thread " << te32.th32ThreadID 
+                            //          << " is suspended" << std::endl;
                         } else {
-                            std::cout << "[GetProcessStatus] Thread " << te32.th32ThreadID 
-                                     << " is running" << std::endl;
+                            // std::cout << "[GetProcessStatus] Thread " << te32.th32ThreadID 
+                            //          << " is running" << std::endl;
                             CloseHandle(hThread);
                             CloseHandle(hSnapshot);
                             return "Running";
                         }
                     } else {
-                        std::cout << "[GetProcessStatus] Failed to get suspend count for thread " 
-                                 << te32.th32ThreadID << " Error: " << GetLastError() << std::endl;
+                        // std::cout << "[GetProcessStatus] Failed to get suspend count for thread " 
+                        //          << te32.th32ThreadID << " Error: " << GetLastError() << std::endl;
                     }
                     CloseHandle(hThread);
                 } else {
-                    std::cout << "[GetProcessStatus] Failed to open thread " << te32.th32ThreadID 
-                             << " Error: " << GetLastError() << std::endl;
+                    // std::cout << "[GetProcessStatus] Failed to open thread " << te32.th32ThreadID 
+                    //          << " Error: " << GetLastError() << std::endl;
                 }
             }
         } while (Thread32Next(hSnapshot, &te32));
     }
     CloseHandle(hSnapshot);
 
-    std::cout << "[GetProcessStatus] Process summary - Total threads: " << threadCount 
-              << ", Suspended threads: " << suspendedCount << std::endl;
+    // std::cout << "[GetProcessStatus] Process summary - Total threads: " << threadCount 
+    //           << ", Suspended threads: " << suspendedCount << std::endl;
 
     if (threadCount > 0 && threadCount == suspendedCount) {
-        std::cout << "[GetProcessStatus] All threads are suspended, marking process as Suspended" << std::endl;
+        // std::cout << "[GetProcessStatus] All threads are suspended, marking process as Suspended" << std::endl;
         return "Suspended";
     }
 
-    std::cout << "[GetProcessStatus] Not all threads are suspended, marking process as Running" << std::endl;
+    // std::cout << "[GetProcessStatus] Not all threads are suspended, marking process as Running" << std::endl;
     return "Running";
 }
 
 std::string ProcessInfoManager::GetProcessCommandLine(HANDLE hProcess) {
     if (!hProcess) {
-        std::cout << "[GetProcessCommandLine] Invalid process handle" << std::endl;
+        // std::cout << "[GetProcessCommandLine] Invalid process handle" << std::endl;
         return "N/A";
     }
 
     bool is64Bit = SystemInfo::IsProcess64Bit(hProcess);
-    std::cout << "[GetProcessCommandLine] Process architecture: " << (is64Bit ? "64-bit" : "32-bit") << std::endl;
+    // std::cout << "[GetProcessCommandLine] Process architecture: " << (is64Bit ? "64-bit" : "32-bit") << std::endl;
     
 #ifdef _WIN64
     if (!is64Bit) {
-        std::cout << "[GetProcessCommandLine] Handling 32-bit process from 64-bit code" << std::endl;
+        // std::cout << "[GetProcessCommandLine] Handling 32-bit process from 64-bit code" << std::endl;
         
         HMODULE hNtDll = GetModuleHandleW(L"ntdll.dll");
         if (!hNtDll) {
-            std::cout << "[GetProcessCommandLine] GetModuleHandleW failed, error: " << GetLastError() << std::endl;
+            // std::cout << "[GetProcessCommandLine] GetModuleHandleW failed, error: " << GetLastError() << std::endl;
             return "N/A";
         }
 
@@ -274,7 +274,7 @@ std::string ProcessInfoManager::GetProcessCommandLine(HANDLE hProcess) {
         );
         
         if (!NtQueryInformationProcess) {
-            std::cout << "[GetProcessCommandLine] GetProcAddress failed, error: " << GetLastError() << std::endl;
+            // std::cout << "[GetProcessCommandLine] GetProcAddress failed, error: " << GetLastError() << std::endl;
             return "N/A";
         }
         
@@ -288,7 +288,7 @@ std::string ProcessInfoManager::GetProcessCommandLine(HANDLE hProcess) {
         );
         
         if (!NT_SUCCESS(status) || peb32Address == NULL) {
-            std::cout << "[GetProcessCommandLine] NtQueryInformationProcess failed with status: " << status << std::endl;
+            // std::cout << "[GetProcessCommandLine] NtQueryInformationProcess failed with status: " << status << std::endl;
             return "N/A";
         }
         
@@ -296,43 +296,43 @@ std::string ProcessInfoManager::GetProcessCommandLine(HANDLE hProcess) {
         SIZE_T bytesRead = 0;
         if (!ReadProcessMemory(hProcess, peb32Address, &peb32, sizeof(peb32), &bytesRead)) {
             DWORD error = GetLastError();
-            std::cout << "[GetProcessCommandLine] Failed to read PEB32, error: " << error << std::endl;
+            // std::cout << "[GetProcessCommandLine] Failed to read PEB32, error: " << error << std::endl;
             return "N/A";
         }
         
         RTL_USER_PROCESS_PARAMETERS32 processParams32 = { 0 };
         if (!ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)peb32.ProcessParameters, &processParams32, sizeof(processParams32), &bytesRead)) {
             DWORD error = GetLastError();
-            std::cout << "[GetProcessCommandLine] Failed to read RTL_USER_PROCESS_PARAMETERS32, error: " << error << std::endl;
+            // std::cout << "[GetProcessCommandLine] Failed to read RTL_USER_PROCESS_PARAMETERS32, error: " << error << std::endl;
             return "N/A";
         }
         
         UNICODE_STRING32 commandLineUnicode = processParams32.CommandLine;
         
         if (commandLineUnicode.Length == 0 || commandLineUnicode.Buffer == 0) {
-            std::cout << "[GetProcessCommandLine] Command line buffer is empty or null" << std::endl;
+            // std::cout << "[GetProcessCommandLine] Command line buffer is empty or null" << std::endl;
             return "";
         }
         
         std::wstring cmdLine(commandLineUnicode.Length / sizeof(WCHAR), L'\0');
         if (!ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)commandLineUnicode.Buffer, &cmdLine[0], commandLineUnicode.Length, &bytesRead)) {
             DWORD error = GetLastError();
-            std::cout << "[GetProcessCommandLine] Failed to read command line buffer, error: " << error << std::endl;
+            // std::cout << "[GetProcessCommandLine] Failed to read command line buffer, error: " << error << std::endl;
             return "N/A";
         }
         
-        std::cout << "[GetProcessCommandLine] Successfully retrieved command line for 32-bit process" << std::endl;
+        // std::cout << "[GetProcessCommandLine] Successfully retrieved command line for 32-bit process" << std::endl;
         return ConvertToString(cmdLine);
     }
 #endif
 
-    std::cout << "[GetProcessCommandLine] Handling native architecture process" << std::endl;
+    // std::cout << "[GetProcessCommandLine] Handling native architecture process" << std::endl;
     PROCESS_BASIC_INFORMATION pbi;
     ULONG returnLength;
     
     HMODULE hNtDll = GetModuleHandleW(L"ntdll.dll");
     if (!hNtDll) {
-        std::cout << "[GetProcessCommandLine] Failed to get ntdll.dll handle" << std::endl;
+        // std::cout << "[GetProcessCommandLine] Failed to get ntdll.dll handle" << std::endl;
         return "N/A";
     }
     
@@ -341,7 +341,7 @@ std::string ProcessInfoManager::GetProcessCommandLine(HANDLE hProcess) {
     );
     
     if (!NtQueryInformationProcess) {
-        std::cout << "[GetProcessCommandLine] Failed to get NtQueryInformationProcess function" << std::endl;
+        // std::cout << "[GetProcessCommandLine] Failed to get NtQueryInformationProcess function" << std::endl;
         return "N/A";
     }
     
@@ -354,7 +354,7 @@ std::string ProcessInfoManager::GetProcessCommandLine(HANDLE hProcess) {
     );
     
     if (status != 0) {
-        std::cout << "[GetProcessCommandLine] NtQueryInformationProcess failed with status: " << status << std::endl;
+        // std::cout << "[GetProcessCommandLine] NtQueryInformationProcess failed with status: " << status << std::endl;
         return "N/A";
     }
     
@@ -362,73 +362,81 @@ std::string ProcessInfoManager::GetProcessCommandLine(HANDLE hProcess) {
     SIZE_T bytesRead;
     if (!ReadProcessMemory(hProcess, pbi.PebBaseAddress, &peb, sizeof(peb), &bytesRead)) {
         DWORD error = GetLastError();
-        std::cout << "[GetProcessCommandLine] Failed to read PEB, error: " << error << std::endl;
+        // std::cout << "[GetProcessCommandLine] Failed to read PEB, error: " << error << std::endl;
         return "N/A";
     }
     
     RTL_USER_PROCESS_PARAMETERS processParams;
     if (!ReadProcessMemory(hProcess, peb.ProcessParameters, &processParams, sizeof(processParams), &bytesRead)) {
         DWORD error = GetLastError();
-        std::cout << "[GetProcessCommandLine] Failed to read RTL_USER_PROCESS_PARAMETERS, error: " << error << std::endl;
+        // std::cout << "[GetProcessCommandLine] Failed to read RTL_USER_PROCESS_PARAMETERS, error: " << error << std::endl;
         return "N/A";
     }
     
     if (processParams.CommandLine.Length == 0 || processParams.CommandLine.Buffer == 0) {
-        std::cout << "[GetProcessCommandLine] Command line buffer is empty or null" << std::endl;
+        // std::cout << "[GetProcessCommandLine] Command line buffer is empty or null" << std::endl;
         return "";
     }
     
     std::wstring cmdLine(processParams.CommandLine.Length / sizeof(WCHAR), L'\0');
     if (!ReadProcessMemory(hProcess, processParams.CommandLine.Buffer, &cmdLine[0], processParams.CommandLine.Length, &bytesRead)) {
         DWORD error = GetLastError();
-        std::cout << "[GetProcessCommandLine] Failed to read command line buffer, error: " << error << std::endl;
+        // std::cout << "[GetProcessCommandLine] Failed to read command line buffer, error: " << error << std::endl;
         return "N/A";
     }
     
-    std::cout << "[GetProcessCommandLine] Successfully retrieved command line" << std::endl;
+    // std::cout << "[GetProcessCommandLine] Successfully retrieved command line" << std::endl;
     return ConvertToString(cmdLine);
 }
 
 ProcessInfo ProcessInfoManager::GetProcessDetails(DWORD pid) {
-    std::cout << "\n[GetProcessDetails] Starting process details retrieval for PID: " << pid << std::endl;
     ProcessInfo info;
     info.pid = pid;
-
-    // Get process architecture
+    
+    // std::cout << "\n[GetProcessDetails] Starting process details retrieval for PID: " << pid << std::endl;
+    
+    // Check if process is 64-bit or 32-bit
+    bool is64BitProcess = false;
+    
+    // Open process to check architecture
     HANDLE hArchProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
     if (hArchProcess) {
         info.is64Bit = SystemInfo::IsProcess64Bit(hArchProcess);
-        std::cout << "[GetProcessDetails] Process architecture: " << (info.is64Bit ? "64-bit" : "32-bit") << std::endl;
+        // std::cout << "[GetProcessDetails] Process architecture: " << (info.is64Bit ? "64-bit" : "32-bit") << std::endl;
         CloseHandle(hArchProcess);
     } else {
+        // Fall back to limited access
         hArchProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
         if (hArchProcess) {
             info.is64Bit = SystemInfo::IsProcess64Bit(hArchProcess);
-            std::cout << "[GetProcessDetails] Process architecture (limited access): " << (info.is64Bit ? "64-bit" : "32-bit") << std::endl;
+            // std::cout << "[GetProcessDetails] Process architecture (limited access): " << (info.is64Bit ? "64-bit" : "32-bit") << std::endl;
             CloseHandle(hArchProcess);
         } else {
-            info.is64Bit = false;
-            std::cout << "[GetProcessDetails] Failed to determine process architecture, defaulting to 32-bit" << std::endl;
+            info.is64Bit = false; // Default to 32-bit
+            // std::cout << "[GetProcessDetails] Failed to determine process architecture, defaulting to 32-bit" << std::endl;
         }
     }
-
-    // Open process with full access rights
-    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+    
+    // Open process with full access
+    HANDLE hProcess = OpenProcess(
+        PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_TERMINATE | PROCESS_SUSPEND_RESUME, 
+        FALSE, pid);
+        
     if (!hProcess) {
         DWORD error = GetLastError();
-        std::cout << "[GetProcessDetails] Failed to open process with full access, error: " << error << ". Trying limited access..." << std::endl;
+        // std::cout << "[GetProcessDetails] Failed to open process with full access, error: " << error << ". Trying limited access..." << std::endl;
         
-        hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+        // Try with limited access
+        hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
         if (!hProcess) {
             error = GetLastError();
-            std::cout << "[GetProcessDetails] Failed to open process with limited access, error: " << error << std::endl;
-            info.name = "N/A";
-            info.imagePath = "N/A";
+            // std::cout << "[GetProcessDetails] Failed to open process with limited access, error: " << error << std::endl;
             return info;
+        } else {
+            // std::cout << "[GetProcessDetails] Successfully opened process with limited access" << std::endl;
         }
-        std::cout << "[GetProcessDetails] Successfully opened process with limited access" << std::endl;
     } else {
-        std::cout << "[GetProcessDetails] Successfully opened process with full access" << std::endl;
+        // std::cout << "[GetProcessDetails] Successfully opened process with full access" << std::endl;
     }
 
     // Get process name and path
@@ -437,15 +445,15 @@ ProcessInfo ProcessInfoManager::GetProcessDetails(DWORD pid) {
 
     if (!QueryFullProcessImageNameW(hProcess, 0, pathW, &pathSize)) {
         DWORD error = GetLastError();
-        std::cout << "[GetProcessDetails] QueryFullProcessImageNameW failed, error: " << error << ". Trying GetModuleFileNameExW..." << std::endl;
+        // std::cout << "[GetProcessDetails] QueryFullProcessImageNameW failed, error: " << error << ". Trying GetModuleFileNameExW..." << std::endl;
         
         if (!GetModuleFileNameExW(hProcess, nullptr, pathW, MAX_PATH)) {
             error = GetLastError();
-            std::cout << "[GetProcessDetails] GetModuleFileNameExW failed, error: " << error << std::endl;
+            // std::cout << "[GetProcessDetails] GetModuleFileNameExW failed, error: " << error << std::endl;
             
             // If both methods fail for 32-bit process, try using NtQueryInformationProcess
             if (!info.is64Bit) {
-                std::cout << "[GetProcessDetails] Attempting to get path using NtQueryInformationProcess for 32-bit process..." << std::endl;
+                // std::cout << "[GetProcessDetails] Attempting to get path using NtQueryInformationProcess for 32-bit process..." << std::endl;
 #ifdef _WIN64
                 PROCESS_BASIC_INFORMATION32 pbi32;
                 ULONG returnLength;
@@ -466,32 +474,32 @@ ProcessInfo ProcessInfoManager::GetProcessDetails(DWORD pid) {
                         );
 
                         if (status != 0) {
-                            std::cout << "[GetProcessDetails] NtWow64QueryInformationProcess32 failed, status: " << status << std::endl;
+                            // std::cout << "[GetProcessDetails] NtWow64QueryInformationProcess32 failed, status: " << status << std::endl;
                         } else {
-                            std::cout << "[GetProcessDetails] Successfully got process information, reading PEB..." << std::endl;
+                            // std::cout << "[GetProcessDetails] Successfully got process information, reading PEB..." << std::endl;
                             
                             PEB32 peb32;
                             SIZE_T bytesRead;
                             if (!ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)pbi32.PebBaseAddress, &peb32, sizeof(peb32), &bytesRead)) {
                                 error = GetLastError();
-                                std::cout << "[GetProcessDetails] Failed to read PEB, error: " << error << std::endl;
+                                // std::cout << "[GetProcessDetails] Failed to read PEB, error: " << error << std::endl;
                             } else {
                                 RTL_USER_PROCESS_PARAMETERS32 processParams32;
                                 if (!ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)peb32.ProcessParameters, &processParams32, sizeof(processParams32), &bytesRead)) {
                                     error = GetLastError();
-                                    std::cout << "[GetProcessDetails] Failed to read process parameters, error: " << error << std::endl;
+                                    // std::cout << "[GetProcessDetails] Failed to read process parameters, error: " << error << std::endl;
                                 } else {
                                     if (processParams32.ImagePathName.Length > 0 && processParams32.ImagePathName.Buffer != 0) {
                                         std::wstring imagePath(processParams32.ImagePathName.Length / sizeof(WCHAR), L'\0');
                                         if (!ReadProcessMemory(hProcess, (PVOID)(ULONG_PTR)processParams32.ImagePathName.Buffer, &imagePath[0], processParams32.ImagePathName.Length, &bytesRead)) {
                                             error = GetLastError();
-                                            std::cout << "[GetProcessDetails] Failed to read image path, error: " << error << std::endl;
+                                            // std::cout << "[GetProcessDetails] Failed to read image path, error: " << error << std::endl;
                                         } else {
                                             wcscpy_s(pathW, MAX_PATH, imagePath.c_str());
-                                            std::cout << "[GetProcessDetails] Successfully retrieved image path using PEB method" << std::endl;
+                                            // std::cout << "[GetProcessDetails] Successfully retrieved image path using PEB method" << std::endl;
                                         }
                                     } else {
-                                        std::cout << "[GetProcessDetails] Image path information is empty in process parameters" << std::endl;
+                                        // std::cout << "[GetProcessDetails] Image path information is empty in process parameters" << std::endl;
                                     }
                                 }
                             }
@@ -501,10 +509,10 @@ ProcessInfo ProcessInfoManager::GetProcessDetails(DWORD pid) {
 #endif
             }
         } else {
-            std::cout << "[GetProcessDetails] Successfully got process path using GetModuleFileNameExW" << std::endl;
+            // std::cout << "[GetProcessDetails] Successfully got process path using GetModuleFileNameExW" << std::endl;
         }
     } else {
-        std::cout << "[GetProcessDetails] Successfully got process path using QueryFullProcessImageNameW" << std::endl;
+        // std::cout << "[GetProcessDetails] Successfully got process path using QueryFullProcessImageNameW" << std::endl;
     }
 
     if (pathW[0] != L'\0') {
@@ -514,11 +522,11 @@ ProcessInfo ProcessInfoManager::GetProcessDetails(DWORD pid) {
         size_t pos = wpath.find_last_of(L"\\");
         if (pos != std::wstring::npos) {
             info.name = ConvertToString(wpath.substr(pos + 1));
-            std::cout << "[GetProcessDetails] Process name: " << info.name << std::endl;
-            std::cout << "[GetProcessDetails] Image path: " << info.imagePath << std::endl;
+            // std::cout << "[GetProcessDetails] Process name: " << info.name << std::endl;
+            // std::cout << "[GetProcessDetails] Image path: " << info.imagePath << std::endl;
         }
     } else {
-        std::cout << "[GetProcessDetails] Path retrieval failed, attempting to get name from process handle..." << std::endl;
+        // std::cout << "[GetProcessDetails] Path retrieval failed, attempting to get name from process handle..." << std::endl;
         HMODULE hMod;
         DWORD cbNeeded;
         if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeeded)) {
@@ -526,69 +534,69 @@ ProcessInfo ProcessInfoManager::GetProcessDetails(DWORD pid) {
             if (GetModuleBaseNameW(hProcess, hMod, szModName, sizeof(szModName)/sizeof(WCHAR))) {
                 info.name = ConvertToString(szModName);
                 info.imagePath = info.name;
-                std::cout << "[GetProcessDetails] Got process name from module: " << info.name << std::endl;
+                // std::cout << "[GetProcessDetails] Got process name from module: " << info.name << std::endl;
             } else {
                 DWORD error = GetLastError();
-                std::cout << "[GetProcessDetails] GetModuleBaseNameW failed, error: " << error << std::endl;
+                // std::cout << "[GetProcessDetails] GetModuleBaseNameW failed, error: " << error << std::endl;
                 info.name = "N/A";
                 info.imagePath = "N/A";
             }
         } else {
             DWORD error = GetLastError();
-            std::cout << "[GetProcessDetails] EnumProcessModules failed, error: " << error << std::endl;
+            // std::cout << "[GetProcessDetails] EnumProcessModules failed, error: " << error << std::endl;
             info.name = "N/A";
             info.imagePath = "N/A";
         }
     }
 
     // Get other process details
-    std::cout << "[GetProcessDetails] Retrieving additional process information..." << std::endl;
+    // std::cout << "[GetProcessDetails] Retrieving additional process information..." << std::endl;
     
     info.username = GetProcessUsername(hProcess);
-    std::cout << "[GetProcessDetails] Username: " << info.username << std::endl;
+    // std::cout << "[GetProcessDetails] Username: " << info.username << std::endl;
     
     info.cpuUsage = GetProcessCpuUsage(hProcess);
-    std::cout << "[GetProcessDetails] CPU Usage: " << info.cpuUsage << "%" << std::endl;
+    // std::cout << "[GetProcessDetails] CPU Usage: " << info.cpuUsage << "%" << std::endl;
     
     info.workingSetPrivate = GetProcessPrivateWorkingSet(hProcess);
-    std::cout << "[GetProcessDetails] Private Working Set: " << info.workingSetPrivate << " bytes" << std::endl;
+    // std::cout << "[GetProcessDetails] Private Working Set: " << info.workingSetPrivate << " bytes" << std::endl;
     
     info.commandLine = GetProcessCommandLine(hProcess);
-    std::cout << "[GetProcessDetails] Command Line: " << (info.commandLine.empty() ? "N/A" : info.commandLine) << std::endl;
+    // std::cout << "[GetProcessDetails] Command Line: " << (info.commandLine.empty() ? "N/A" : info.commandLine) << std::endl;
     
     info.status = GetProcessStatus(hProcess);
-    std::cout << "[GetProcessDetails] Process Status: " << info.status << std::endl;
+    // std::cout << "[GetProcessDetails] Process Status: " << info.status << std::endl;
     
     info.isProtected = IsProcessProtected(pid);
-    std::cout << "[GetProcessDetails] Protected: " << (info.isProtected ? "Yes" : "No") << std::endl;
+    // std::cout << "[GetProcessDetails] Protected: " << (info.isProtected ? "Yes" : "No") << std::endl;
     
     info.iconBase64 = IconManager::GetProcessIconBase64(pid);
-    std::cout << "[GetProcessDetails] Icon retrieved: " << (!info.iconBase64.empty() ? "Yes" : "No") << std::endl;
+    // std::cout << "[GetProcessDetails] Icon retrieved: " << (!info.iconBase64.empty() ? "Yes" : "No") << std::endl;
     
     info.hasVisibleWindow = HasVisibleWindow(pid);
-    std::cout << "[GetProcessDetails] Has Visible Window: " << (info.hasVisibleWindow ? "Yes" : "No") << std::endl;
+    // std::cout << "[GetProcessDetails] Has Visible Window: " << (info.hasVisibleWindow ? "Yes" : "No") << std::endl;
 
     CloseHandle(hProcess);
-    std::cout << "[GetProcessDetails] Process details retrieval completed for PID: " << pid << "\n" << std::endl;
+    // std::cout << "[GetProcessDetails] Process details retrieval completed for PID: " << pid << "\n" << std::endl;
     return info;
 }
 
 std::string ProcessInfoManager::GetProcessDescription(const std::wstring& filePath) {
-    std::cout << "[GetProcessDescription] Attempting to get description for: " << ConvertToString(filePath) << std::endl;
+    // std::cout << "[GetProcessDescription] Attempting to get description for: " << ConvertToString(filePath) << std::endl;
 
     DWORD handle = 0;
     DWORD size = GetFileVersionInfoSizeW(filePath.c_str(), &handle);
     if (size == 0) {
         DWORD error = GetLastError();
-        std::cout << "[GetProcessDescription] GetFileVersionInfoSizeW failed. Error: " << error << std::endl;
+        // std::cout << "[GetProcessDescription] GetFileVersionInfoSizeW failed. Error: " << error << std::endl;
         return "";
     }
 
-    std::cout << "[GetProcessDescription] Version info size: " << size << " bytes" << std::endl;
+    // std::cout << "[GetProcessDescription] Version info size: " << size << " bytes" << std::endl;
     std::vector<BYTE> buffer(size);
     if (!GetFileVersionInfoW(filePath.c_str(), handle, size, buffer.data())) {
         DWORD error = GetLastError();
-        std::cout << "[GetProcessDescription] GetFileVersionInfoW failed. Error: " << error << std::endl;
+        // std::cout << "[GetProcessDescription] GetFileVersionInfoW failed. Error: " << error << std::endl;
         return "";
     }
 
@@ -602,12 +610,12 @@ std::string ProcessInfoManager::GetProcessDescription(const std::wstring& filePa
     if (!VerQueryValueW(buffer.data(), L"\\VarFileInfo\\Translation",
         (LPVOID*)&translations, &translationSize)) {
         DWORD error = GetLastError();
-        std::cout << "[GetProcessDescription] VerQueryValueW for Translation failed. Error: " << error << std::endl;
+        // std::cout << "[GetProcessDescription] VerQueryValueW for Translation failed. Error: " << error << std::endl;
         return "";
     }
 
-    std::cout << "[GetProcessDescription] Found " << (translationSize / sizeof(LANGANDCODEPAGE)) 
-              << " language translations" << std::endl;
+    // std::cout << "[GetProcessDescription] Found " << (translationSize / sizeof(LANGANDCODEPAGE)) 
+    //           << " language translations" << std::endl;
 
     // Try each translation
     for (UINT i = 0; i < (translationSize / sizeof(LANGANDCODEPAGE)); i++) {
@@ -616,9 +624,9 @@ std::string ProcessInfoManager::GetProcessDescription(const std::wstring& filePa
         swprintf_s(subBlock, L"\\StringFileInfo\\%04x%04x\\FileDescription",
             translations[i].language, translations[i].codePage);
 
-        std::cout << "[GetProcessDescription] Trying language/codepage: " 
-                  << std::hex << translations[i].language << "/" 
-                  << translations[i].codePage << std::dec << std::endl;
+        // std::cout << "[GetProcessDescription] Trying language/codepage: " 
+        //           << std::hex << translations[i].language << "/" 
+        //           << translations[i].codePage << std::dec << std::endl;
 
         LPWSTR description = nullptr;
         UINT descriptionLen = 0;
@@ -627,17 +635,17 @@ std::string ProcessInfoManager::GetProcessDescription(const std::wstring& filePa
         if (VerQueryValueW(buffer.data(), subBlock, (LPVOID*)&description, &descriptionLen)) {
             if (description && descriptionLen) {
                 std::string desc = ConvertToString(description);
-                std::cout << "[GetProcessDescription] Found description: " << desc << std::endl;
+                // std::cout << "[GetProcessDescription] Found description: " << desc << std::endl;
                 return desc;
             }
-            std::cout << "[GetProcessDescription] VerQueryValueW succeeded but description is empty" << std::endl;
+            // std::cout << "[GetProcessDescription] VerQueryValueW succeeded but description is empty" << std::endl;
         } else {
             DWORD error = GetLastError();
-            std::cout << "[GetProcessDescription] VerQueryValueW for FileDescription failed. Error: " << error << std::endl;
+            // std::cout << "[GetProcessDescription] VerQueryValueW for FileDescription failed. Error: " << error << std::endl;
         }
     }
 
-    std::cout << "[GetProcessDescription] No description found after trying all translations" << std::endl;
+    // std::cout << "[GetProcessDescription] No description found after trying all translations" << std::endl;
     return "";
 }
 
@@ -650,12 +658,12 @@ bool ProcessInfoManager::ResumeProcess(DWORD pid) {
 }
 
 bool ProcessInfoManager::SetProcessState(DWORD pid, bool suspend) {
-    std::cout << "\n[SetProcessState] " << (suspend ? "Suspending" : "Resuming") 
-              << " process " << pid << std::endl;
+    // std::cout << "\n[SetProcessState] " << (suspend ? "Suspending" : "Resuming") 
+    //           << " process " << pid << std::endl;
 
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
     if (hSnapshot == INVALID_HANDLE_VALUE) {
-        std::cout << "[SetProcessState] Failed to create thread snapshot. Error: " << GetLastError() << std::endl;
+        // std::cout << "[SetProcessState] Failed to create thread snapshot. Error: " << GetLastError() << std::endl;
         return false;
     }
 
@@ -669,14 +677,14 @@ bool ProcessInfoManager::SetProcessState(DWORD pid, bool suspend) {
         do {
             if (te32.th32OwnerProcessID == pid) {
                 threadCount++;
-                std::cout << "[SetProcessState] Found thread " << te32.th32ThreadID << std::endl;
+                // std::cout << "[SetProcessState] Found thread " << te32.th32ThreadID << std::endl;
                 
                 HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME, FALSE, te32.th32ThreadID);
                 if (hThread) {
                     threadHandles.push_back(hThread);
                 } else {
-                    std::cout << "[SetProcessState] Failed to open thread " << te32.th32ThreadID 
-                            << " Error: " << GetLastError() << std::endl;
+                    // std::cout << "[SetProcessState] Failed to open thread " << te32.th32ThreadID 
+                    //         << " Error: " << GetLastError() << std::endl;
                     success = false;
                 }
             }
@@ -684,15 +692,15 @@ bool ProcessInfoManager::SetProcessState(DWORD pid, bool suspend) {
     }
 
     CloseHandle(hSnapshot);
-    std::cout << "[SetProcessState] Found " << threadCount << " threads, successfully opened " 
-              << threadHandles.size() << " threads" << std::endl;
+    // std::cout << "[SetProcessState] Found " << threadCount << " threads, successfully opened " 
+    //           << threadHandles.size() << " threads" << std::endl;
 
     if (!threadHandles.empty()) {
         for (HANDLE hThread : threadHandles) {
             if (suspend) {
                 DWORD prevCount = SuspendThread(hThread);
-                std::cout << "[SetProcessState] Suspended thread, previous suspend count: " 
-                         << prevCount << std::endl;
+                // std::cout << "[SetProcessState] Suspended thread, previous suspend count: " 
+                //          << prevCount << std::endl;
                 if (prevCount == (DWORD)-1) {
                     success = false;
                 }
@@ -702,8 +710,8 @@ bool ProcessInfoManager::SetProcessState(DWORD pid, bool suspend) {
                 do {
                     result = ResumeThread(hThread);
                     resumeCount++;
-                    std::cout << "[SetProcessState] Resume attempt " << resumeCount 
-                             << ", result: " << result << std::endl;
+                    // std::cout << "[SetProcessState] Resume attempt " << resumeCount 
+                    //          << ", result: " << result << std::endl;
                 } while (result > 0);  // Keep resuming until count is 0
                 
                 if (result == (DWORD)-1) {
@@ -714,9 +722,9 @@ bool ProcessInfoManager::SetProcessState(DWORD pid, bool suspend) {
         }
     }
 
-    std::cout << "[SetProcessState] " << (suspend ? "Suspend" : "Resume") 
-              << " operation completed with " << (success ? "success" : "failure") 
-              << " for PID: " << pid << "\n" << std::endl;
+    // std::cout << "[SetProcessState] " << (suspend ? "Suspend" : "Resume") 
+    //           << " operation completed with " << (success ? "success" : "failure") 
+    //           << " for PID: " << pid << "\n" << std::endl;
 
     return success;
 }
@@ -726,7 +734,7 @@ std::vector<ModuleInfo> ProcessInfoManager::GetProcessModules(DWORD pid) {
     
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
     if (!hProcess) {
-        std::cout << "[GetProcessModules] Failed to open process. Error: " << GetLastError() << std::endl;
+        // std::cout << "[GetProcessModules] Failed to open process. Error: " << GetLastError() << std::endl;
         return modules;
     }
 
@@ -735,7 +743,7 @@ std::vector<ModuleInfo> ProcessInfoManager::GetProcessModules(DWORD pid) {
 
     // Use EnumProcessModulesEx to get all modules including 32-bit ones
     if (EnumProcessModulesEx(hProcess, hMods, sizeof(hMods), &cbNeeded, LIST_MODULES_ALL)) {
-        std::cout << "[GetProcessModules] Found " << (cbNeeded / sizeof(HMODULE)) << " modules" << std::endl;
+        // std::cout << "[GetProcessModules] Found " << (cbNeeded / sizeof(HMODULE)) << " modules" << std::endl;
         for (unsigned int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
             ModuleInfo module;
             WCHAR szModPath[MAX_PATH];
@@ -758,9 +766,9 @@ std::vector<ModuleInfo> ProcessInfoManager::GetProcessModules(DWORD pid) {
                 if (GetModuleInformation(hProcess, hMods[i], &modInfo, sizeof(modInfo))) {
                     module.baseAddress = reinterpret_cast<uintptr_t>(modInfo.lpBaseOfDll);
                     module.size = modInfo.SizeOfImage;
-                    std::cout << "[GetProcessModules] Module: " << module.name 
-                             << " Base: 0x" << std::hex << module.baseAddress 
-                             << " Size: " << std::dec << module.size << std::endl;
+                    // std::cout << "[GetProcessModules] Module: " << module.name 
+                    //          << " Base: 0x" << std::hex << module.baseAddress 
+                    //          << " Size: " << std::dec << module.size << std::endl;
                 }
 
                 // Get module description
@@ -770,7 +778,7 @@ std::vector<ModuleInfo> ProcessInfoManager::GetProcessModules(DWORD pid) {
             }
         }
     } else {
-        std::cout << "[GetProcessModules] EnumProcessModulesEx failed. Error: " << GetLastError() << std::endl;
+        // std::cout << "[GetProcessModules] EnumProcessModulesEx failed. Error: " << GetLastError() << std::endl;
     }
 
     CloseHandle(hProcess);
